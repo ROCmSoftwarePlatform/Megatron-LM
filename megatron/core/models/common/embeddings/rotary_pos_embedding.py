@@ -12,7 +12,12 @@ import logging
 
 import torch
 from torch import Tensor, nn
-import transformer_engine.pytorch.cpp_extensions as tex
+
+try:
+    import transformer_engine.pytorch.cpp_extensions as tex
+    HAVE_TE = True
+except ImportError:
+    HAVE_TE = False
 
 from megatron.core import parallel_state
 
@@ -230,7 +235,7 @@ def apply_rotary_pos_emb(
     Reroute to the appropriate apply_rotary_pos_emb function depending on
     fused/unfused kernels, or bshd (conventional) / thd (packed seq) format
     """
-    if torch.cuda.is_available() and torch.version.hip:
+    if HAVE_TE and torch.cuda.is_available() and torch.version.hip:
         return apply_rotary_pos_emb_fused_te(t = t, freqs = freqs, config = config, cu_seqlens = cu_seqlens)
     else:
         if config.apply_rope_fusion and not HAVE_APPLY_ROPE_FUSION:
