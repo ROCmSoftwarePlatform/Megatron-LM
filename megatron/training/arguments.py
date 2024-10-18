@@ -855,7 +855,7 @@ def _add_network_size_args(parser):
                        action='store_false',
                        help='Disable position embedding. Deprecated: use --position-embedding-type',
                        dest='add_position_embedding')
-    group.add_argument('--use-te-fused-rope', action='store_true',
+    group.add_argument('--use-te-fused-rope', action='store_true', default = True,
                        help='Use fused rope from transformer-engine: use --use-te-fused-rope')
     group.add_argument('--make-vocab-size-divisible-by', type=int, default=128,
                        help='Pad the vocab size to be divisible by this value.'
