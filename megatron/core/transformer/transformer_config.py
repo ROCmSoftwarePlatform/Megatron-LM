@@ -165,8 +165,8 @@ class TransformerConfig(ModelParallelConfig):
     apply_rope_fusion: bool = False
     """If True, use fused RoPE kernel."""
 
-    use_te_fused_rope: bool = False
-    """If True, use fused RoPE kernel from transformer engine"""
+    disable_te_fused_rope: bool = False
+    """If True, disable fused RoPE kernel from transformer engine"""
 
     ####################
     # activation recomputation
