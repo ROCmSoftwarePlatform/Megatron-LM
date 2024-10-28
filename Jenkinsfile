@@ -12,23 +12,27 @@ def show_node_info() {
     """
 }
 
-DOCKER_IMAGE = megatron-lm
-CONTAINER_NAME = megatron-lm-container
-TEST_COMMAND = "bash ./run-tests.sh"
+// DOCKER_IMAGE = megatron-lm
+// CONTAINER_NAME = megatron-lm-container
+// TEST_COMMAND = "bash ./run-tests.sh"
 
-show_node_info()
+
 
 pipeline {
 
     agent {node {label "${params.TEST_NODE}"}}
 
     parameters {
+        string(name: 'DOCKER_IMAGE', defaultValue: 'megatron-lm:latest', description: 'Docker image name to build')
+        string(name: 'CONTAINER_NAME', defaultValue: 'megatron-lm-container', description: 'Docker container name')
+        string(name: 'TEST_COMMAND', defaultValue: './run-tests.sh', description: 'Test command to execute in the container')
         string(name: 'TEST_NODE', defaultValue: 'scm', description: 'Node or Label to launch Jenkins Job')
     }
-
+    
     stages {
         stage('Build Docker Image') {
             steps {
+                show_node_info()
                 script {
                     sh "docker build  -f Dockerfile_amd -t ${params.DOCKER_IMAGE} ."
                     }
