@@ -12,29 +12,24 @@ def show_node_info() {
     """
 }
 
-// DOCKER_IMAGE = megatron-lm
-// CONTAINER_NAME = megatron-lm-container
-// TEST_COMMAND = "bash ./run-tests.sh"
-
-
-
+DOCKER_IMAGE = "megatron-lm"
+CONTAINER_NAME = "megatron-lm-container"
+DOCKER_ARGS = "--workdir /workspace/Megatron-LM --entrypoint /workspace/Megatron-LM/run_tests.sh"
+DOCKER_RUN_CMD= "docker run --rm -t -u 1069:1071 --network host -u root --group-add video --cap-add=SYS_PTRACE --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined --ipc=host --env DLM_MODEL_NAME='pyt_huggingface_gpt_neo' --env JENKINS_BUILD_NUMBER='0' --device=/dev/kfd --device=/dev/dri/renderD128  --device=/dev/dri/renderD128  --device=/dev/dri/renderD129  --device=/dev/dri/renderD130  --device=/dev/dri/renderD131"
 pipeline {
 
-    agent {node {label "${params.TEST_NODE}"}}
-
     parameters {
-        string(name: 'DOCKER_IMAGE', defaultValue: 'megatron-lm:latest', description: 'Docker image name to build')
-        string(name: 'CONTAINER_NAME', defaultValue: 'megatron-lm-container', description: 'Docker container name')
-        string(name: 'TEST_COMMAND', defaultValue: './run-tests.sh', description: 'Test command to execute in the container')
-        string(name: 'TEST_NODE', defaultValue: 'scm', description: 'Node or Label to launch Jenkins Job')
+        string(name: 'TEST_NODE_LABEL', defaultValue: 'MI250', description: 'Node or Label to launch Jenkins Job')
     }
     
+    agent {node {label "${params.TEST_NODE_LABEL}"}}
+
     stages {
         stage('Build Docker Image') {
             steps {
                 show_node_info()
                 script {
-                    sh "docker build  -f Dockerfile_amd -t ${params.DOCKER_IMAGE} ."
+                    sh "docker build  -f Dockerfile_amd -t ${DOCKER_IMAGE} ."
                     }
                 }
             }
@@ -42,28 +37,18 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh "docker run -d --name ${params.CONTAINER_NAME} ${params.DOCKER_IMAGE}"
+                    sh "${DOCKER_RUN_CMD} ${DOCKER_ARGS} --name ${CONTAINER_NAME} ${DOCKER_IMAGE} "
                 }
             }
         }
+    }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    sh "docker exec ${params.CONTAINER_NAME} bash -c ${params.TEST_COMMAND}"
-                }
+    post { 
+        always { 
+            //Cleanup
+            script {
+                sh "docker rmi ${DOCKER_IMAGE}"
             }
         }
-
-         stage('Cleanup') {
-            steps {
-                script {
-                    sh "docker stop ${params.CONTAINER_NAME}"
-                    sh "docker rm ${params.CONTAINER_NAME}"
-                    sh "docker rmi ${params.DOCKER_IMAGE}"
-                }
-            }
-        }
-
     }
 }
