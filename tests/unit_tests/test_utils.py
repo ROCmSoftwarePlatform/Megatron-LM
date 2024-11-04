@@ -111,7 +111,6 @@ def test_cross_check_param_hashes_across_dp_replicas():
     _deinit_distributed()
 
 @pytest.mark.failing_on_rocm
-@pytest.mark.skip(reason="failing on rocm")
 def test_straggler_detector():
     world = int(os.getenv('WORLD_SIZE', '1'))
     rank = int(os.getenv('RANK', '0'))
