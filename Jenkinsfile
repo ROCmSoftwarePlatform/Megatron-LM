@@ -15,7 +15,7 @@ def show_node_info() {
 DOCKER_IMAGE = "megatron-lm"
 CONTAINER_NAME = "megatron-lm-container"
 DOCKER_BUILD_ARGS = "--build-arg PYTORCH_ROCM_ARCH_OVERRIDE=gfx90a"
-DOCKER_RUN_ARGS = "--workdir /workspace/Megatron-LM --entrypoint /workspace/Megatron-LM/run_unit_tests.sh"
+DOCKER_RUN_ARGS = "-v \$(pwd):/workspace/Megatron-LM/output --workdir /workspace/Megatron-LM --entrypoint /workspace/Megatron-LM/run_unit_tests.sh"
 
 DOCKER_RUN_CMD= "docker run --rm -t --network host -u root --group-add video --cap-add=SYS_PTRACE --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined --ipc=host --device=/dev/kfd --device=/dev/dri"
 pipeline {
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 show_node_info()
                 script {
-                    sh "docker build  -f Dockerfile_rocm -t ${DOCKER_IMAGE}  ${DOCKER_BUILD_ARGS} ."
+                    sh "docker build  -f Dockerfile_rocm_ci -t ${DOCKER_IMAGE}  ${DOCKER_BUILD_ARGS} ."
                     }
                 }
             }
@@ -38,7 +38,9 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh "${DOCKER_RUN_CMD} ${DOCKER_ARGS} --name ${CONTAINER_NAME} ${DOCKER_IMAGE} "
+                     
+                    sh "${DOCKER_RUN_CMD} ${DOCKER_RUN_ARGS} --name ${CONTAINER_NAME} ${DOCKER_IMAGE} "
+                   
                 }
             }
         }
@@ -47,7 +49,7 @@ pipeline {
     post {
         always {
             //Cleanup
-            archiveArtifacts 'test_report.csv'
+             archiveArtifacts artifacts: 'test_report.csv'
             script {
                 sh "docker rmi ${DOCKER_IMAGE}"
             }
