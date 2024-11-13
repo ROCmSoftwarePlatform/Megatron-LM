@@ -112,7 +112,7 @@ pipeline {
     post {
         always {
             // Archive test results
-            archiveArtifacts artifacts: '**/test_report.csv', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'test_report.csv'
 
             script {
                 def currentNodeLabels = env.NODE_LABELS ? env.NODE_LABELS.split() : []
