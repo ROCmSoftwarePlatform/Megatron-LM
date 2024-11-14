@@ -1,30 +1,13 @@
 import org.apache.commons.io.FilenameUtils
 import groovy.json.JsonOutput
 
-def show_node_info() {
-    sh """
-        echo "NODE_NAME = \$NODE_NAME" || true
-        lsb_release -sd || true
-        uname -r || true
-        cat /sys/module/amdgpu/version || true
-        ls /opt/ -la || true
-    """
-}
-
-def clean_up_docker_containers() {
-    sh """
-    set +e
-    docker stop ${env.CONTAINER_NAME} || true
-    docker rm ${env.CONTAINER_NAME} || true
-    """
-}
 
 def clean_up_docker_images() {
-    sh """
-    set +e
-    docker rmi ${env.REPO_NAME}:${env.DOCKER_TAG} || true
-    docker rmi ${env.REPO_NAME}:${env.imageSha} || true
-    """
+    // Check if the images exist before attempting to remove them
+    def imageExists = sh(script: "docker images -q ${env.DOCKER_IMAGE}", returnStdout: true).trim()
+    if (imageExists) {
+        sh "docker rmi ${env.DOCKER_IMAGE}"
+    }
 }
 
 def clean_docker_build_cache() {
@@ -32,7 +15,9 @@ def clean_docker_build_cache() {
 }
 
 pipeline {
-    agent { label 'build-only' }
+    agent {
+        label 'build-only'
+    }
 
     parameters {
         string(name: 'TEST_NODE_LABEL', defaultValue: 'MI300X_BANFF', description: 'Node or Label to launch Jenkins Job')
@@ -41,7 +26,6 @@ pipeline {
 
     environment {
         REPO_NAME = 'rocm/megatron-lm'
-        DOCKER_TAG = 'latest'
         CONTAINER_NAME = "megatron-lm-container"
         DOCKER_RUN_ARGS = "-v \$(pwd):/workspace/Megatron-LM/output --workdir /workspace/Megatron-LM \
         --entrypoint /workspace/Megatron-LM/run_unit_tests.sh"
@@ -53,75 +37,55 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             steps {
-                show_node_info()
-                clean_up_docker_images()
                 clean_docker_build_cache()
                 script {
-                    DOCKER_BUILD_ARGS = "--build-arg PYTORCH_ROCM_ARCH_OVERRIDE=${params.GPU_ARCH}"
-                    sh "docker build -f Dockerfile_rocm.ci -t ${env.REPO_NAME}:${env.DOCKER_TAG} ${DOCKER_BUILD_ARGS} ."
-                }
-            }
-        }
 
-        stage('Tag Docker Image') {
-            steps {
-                script {
-                    // Get the short image SHA (first 12 characters of the image ID)
-                    env.imageSha = sh(script: "docker images --format '{{.ID}}' ${env.REPO_NAME}:${env.DOCKER_TAG} | head -c 12", returnStdout: true).trim()
+                    // Generate a unique UUID for the Docker image name
+                    def uuid = sh(script: 'uuidgen', returnStdout: true).trim()
+                    env.DOCKER_IMAGE = "${REPO_NAME}:${uuid}"
 
-                    if (!env.imageSha) {
-                        error "Failed to retrieve the image SHA for ${env.REPO_NAME}:${env.DOCKER_TAG}"
-                    }
+                    // Build Docker image
+                    sh "docker build --no-cache -f Dockerfile_rocm.ci --build-arg PYTORCH_ROCM_ARCH_OVERRIDE=${params.GPU_ARCH} -t ${env.DOCKER_IMAGE} ."
 
-                    echo "Image SHA: ${env.imageSha}"
-                    echo "Docker Tag: ${env.DOCKER_TAG}"
-
-                    // Tag the image with the short SHA
-                    sh "docker tag ${env.REPO_NAME}:${env.DOCKER_TAG} ${env.REPO_NAME}:${env.imageSha}"
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker push ${env.REPO_NAME}:${env.imageSha}"  // Also push the image with short SHA
+                        sh "docker push ${env.DOCKER_IMAGE}"  
                     }
+                }
+            }
+            post {
+                always {
+                    clean_up_docker_images()
                 }
             }
         }
 
         stage('Run Unit Tests') {
-            agent { node { label "${params.TEST_NODE_LABEL}" } }
+            agent {
+                node {
+                    label "${params.TEST_NODE_LABEL}"
+                }
+            }
+
             steps {
                 script {
                     // Pull the Docker image from the repository on the test node
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker pull ${env.REPO_NAME}:${env.imageSha}"
+                        sh "docker pull ${env.DOCKER_IMAGE}"
                     }
 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        sh "${DOCKER_RUN_CMD} ${DOCKER_RUN_ARGS} --name ${env.CONTAINER_NAME} ${env.REPO_NAME}:${env.imageSha}"
+                        sh "${DOCKER_RUN_CMD} ${DOCKER_RUN_ARGS} --name ${env.CONTAINER_NAME} ${env.DOCKER_IMAGE}"
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            // Archive test results
-            archiveArtifacts artifacts: '**/test_report.csv', allowEmptyArchive: true
-
-            script {
-                def currentNodeLabels = env.NODE_LABELS ? env.NODE_LABELS.split() : []
-
-                if (!currentNodeLabels.contains('build-only')) {
-                    clean_up_docker_containers()
+            post {
+                always {
+                // Archive test results
+                script {
+                    archiveArtifacts artifacts: 'test_report.csv', allowEmptyArchive: true
+                    clean_up_docker_images()
+                    }
                 }
-
-                clean_up_docker_images()
             }
         }
     }
