@@ -3,20 +3,10 @@ import groovy.json.JsonOutput
 
 
 def clean_up_docker_images() {
-    echo "Running clean_up_docker_images..."
-
     // Check if the images exist before attempting to remove them
-    def imageExists = sh(script: "docker images -q ${env.REPO_NAME}:${env.DOCKER_TAG}", returnStdout: true).trim()
-    def imageShaExists = sh(script: "docker images -q ${env.REPO_NAME}:${env.imageSha}", returnStdout: true).trim()
-
+    def imageExists = sh(script: "docker images -q ${env.DOCKER_IMAGE}", returnStdout: true).trim()
     if (imageExists) {
-        echo "Removing Docker image: ${env.REPO_NAME}:${env.DOCKER_TAG}"
-        sh "docker rmi ${env.REPO_NAME}:${env.DOCKER_TAG}"
-    }
-
-    if (imageShaExists) {
-        echo "Removing Docker image: ${env.REPO_NAME}:${env.imageSha}"
-        sh "docker rmi ${env.REPO_NAME}:${env.imageSha}"
+        sh "docker rmi ${env.DOCKER_IMAGE}"
     }
 }
 
@@ -36,7 +26,6 @@ pipeline {
 
     environment {
         REPO_NAME = 'rocm/megatron-lm'
-        DOCKER_TAG = 'latest'
         CONTAINER_NAME = "megatron-lm-container"
         DOCKER_RUN_ARGS = "-v \$(pwd):/workspace/Megatron-LM/output --workdir /workspace/Megatron-LM \
         --entrypoint /workspace/Megatron-LM/run_unit_tests.sh"
@@ -50,21 +39,16 @@ pipeline {
             steps {
                 clean_docker_build_cache()
                 script {
-                    DOCKER_BUILD_ARGS = "--build-arg PYTORCH_ROCM_ARCH_OVERRIDE=${params.GPU_ARCH}"
+
+                    // Generate a unique UUID for the Docker image name
+                    def uuid = sh(script: 'uuidgen', returnStdout: true).trim()
+                    env.DOCKER_IMAGE = "${REPO_NAME}:${uuid}"
 
                     // Build Docker image
-                    sh "docker build -f Dockerfile_rocm.ci -t ${env.REPO_NAME}:${env.DOCKER_TAG} ${DOCKER_BUILD_ARGS} ."
+                    sh "docker build --no-cache -f Dockerfile_rocm.ci --build-arg PYTORCH_ROCM_ARCH_OVERRIDE=${params.GPU_ARCH} -t ${env.DOCKER_IMAGE} ."
 
-                    // Get the short image SHA (first 12 characters of the image ID)
-                    env.imageSha = sh(script: "docker images --format '{{.ID}}' ${env.REPO_NAME}:${env.DOCKER_TAG} | head -c 12", returnStdout: true).trim()
-                    if (!env.imageSha) {
-                        error "Failed to retrieve the image SHA for ${env.REPO_NAME}:${env.DOCKER_TAG}"
-                    }
-
-                    // Tag the image with the short SHA and push to repo
-                    sh "docker tag ${env.REPO_NAME}:${env.DOCKER_TAG} ${env.REPO_NAME}:${env.imageSha}"
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker push ${env.REPO_NAME}:${env.imageSha}"  
+                        sh "docker push ${env.DOCKER_IMAGE}"  
                     }
                 }
             }
@@ -86,11 +70,11 @@ pipeline {
                 script {
                     // Pull the Docker image from the repository on the test node
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker pull ${env.REPO_NAME}:${env.imageSha}"
+                        sh "docker pull ${env.DOCKER_IMAGE}"
                     }
 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        sh "${DOCKER_RUN_CMD} ${DOCKER_RUN_ARGS} --name ${env.CONTAINER_NAME} ${env.REPO_NAME}:${env.imageSha}"
+                        sh "${DOCKER_RUN_CMD} ${DOCKER_RUN_ARGS} --name ${env.CONTAINER_NAME} ${env.DOCKER_IMAGE}"
                     }
                 }
             }
