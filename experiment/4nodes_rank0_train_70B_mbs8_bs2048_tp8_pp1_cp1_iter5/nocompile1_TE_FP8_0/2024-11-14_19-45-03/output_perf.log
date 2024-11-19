@@ -1,0 +1,1350 @@
+W1114 19:45:06.534959 139675851104896 torch/distributed/run.py:778] 
+W1114 19:45:06.534959 139675851104896 torch/distributed/run.py:778] *****************************************
+W1114 19:45:06.534959 139675851104896 torch/distributed/run.py:778] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1114 19:45:06.534959 139675851104896 torch/distributed/run.py:778] *****************************************
+using world size: 32, data-parallel size: 4, context-parallel size: 1, tensor-model-parallel size: 8, encoder-tensor-model-parallel size: 0, pipeline-model-parallel size: 1, encoder-pipeline-model-parallel size: 0
+WARNING: overriding default arguments for tokenizer_type:GPT2BPETokenizer                        with tokenizer_type:Llama2Tokenizer
+WARNING: Please specify --split when using --data-path. Using legacy default value of "969, 30, 1"
+accumulate and all-reduce gradients in fp32 for bfloat16 data type.
+using torch.bfloat16 for parameters ...
+------------------------ arguments ------------------------
+  accumulate_allreduce_grads_in_fp32 .............. True
+  adam_beta1 ...................................... 0.9
+  adam_beta2 ...................................... 0.999
+  adam_eps ........................................ 1e-08
+  add_bias_linear ................................. False
+  add_position_embedding .......................... False
+  add_qkv_bias .................................... False
+  adlr_autoresume ................................. False
+  adlr_autoresume_interval ........................ 1000
+  align_grad_reduce ............................... True
+  align_param_gather .............................. False
+  app_tag_run_name ................................ None
+  app_tag_run_version ............................. 0.0.0
+  apply_layernorm_1p .............................. False
+  apply_query_key_layer_scaling ................... False
+  apply_residual_connection_post_layernorm ........ False
+  apply_rope_fusion ............................... True
+  async_save ...................................... None
+  async_tensor_model_parallel_allreduce ........... False
+  attention_dropout ............................... 0.0
+  attention_softmax_in_fp32 ....................... False
+  auto_detect_ckpt_format ......................... False
+  barrier_with_L1_time ............................ True
+  bert_binary_head ................................ True
+  bert_embedder_type .............................. megatron
+  bert_load ....................................... None
+  bf16 ............................................ True
+  bias_dropout_fusion ............................. True
+  bias_gelu_fusion ................................ False
+  bias_swiglu_fusion .............................. True
+  biencoder_projection_dim ........................ 0
+  biencoder_shared_query_context_model ............ False
+  block_data_path ................................. None
+  calculate_per_token_loss ........................ False
+  check_for_nan_in_loss_and_grad .................. True
+  check_weight_hash_across_dp_replicas_interval ... None
+  ckpt_assume_constant_structure .................. False
+  ckpt_convert_format ............................. None
+  ckpt_convert_save ............................... None
+  ckpt_convert_update_legacy_dist_opt_format ...... False
+  ckpt_format ..................................... torch_dist
+  ckpt_fully_parallel_load ........................ False
+  ckpt_fully_parallel_save ........................ True
+  ckpt_fully_parallel_save_deprecated ............. False
+  ckpt_step ....................................... None
+  classes_fraction ................................ 1.0
+  clip_grad ....................................... 1.0
+  clone_scatter_output_in_embedding ............... True
+  config_logger_dir ............................... 
+  consumed_train_samples .......................... 0
+  consumed_valid_samples .......................... 0
+  context_parallel_size ........................... 1
+  create_attention_mask_in_dataloader ............. True
+  cross_entropy_loss_fusion ....................... False
+  data_cache_path ................................. None
+  data_parallel_random_init ....................... False
+  data_parallel_size .............................. 4
+  data_path ....................................... ['/root/.cache/data/bookcorpus_text_sentence']
+  data_per_class_fraction ......................... 1.0
+  data_sharding ................................... True
+  dataloader_type ................................. cyclic
+  ddp_average_in_collective ....................... False
+  ddp_bucket_size ................................. None
+  decoder_first_pipeline_num_layers ............... None
+  decoder_last_pipeline_num_layers ................ None
+  decoder_num_layers .............................. None
+  decoder_seq_length .............................. None
+  decoupled_lr .................................... None
+  decoupled_min_lr ................................ None
+  decrease_batch_size_if_needed ................... False
+  defer_embedding_wgrad_compute ................... False
+  deprecated_use_mcore_models ..................... True
+  deterministic_mode .............................. False
+  dino_bottleneck_size ............................ 256
+  dino_freeze_last_layer .......................... 1
+  dino_head_hidden_size ........................... 2048
+  dino_local_crops_number ......................... 10
+  dino_local_img_size ............................. 96
+  dino_norm_last_layer ............................ False
+  dino_teacher_temp ............................... 0.07
+  dino_warmup_teacher_temp ........................ 0.04
+  dino_warmup_teacher_temp_epochs ................. 30
+  disable_straggler_on_startup .................... False
+  disable_te_fused_rope ........................... False
+  dist_ckpt_format_deprecated ..................... None
+  dist_ckpt_strictness ............................ assume_ok_unexpected
+  distribute_saved_activations .................... False
+  distributed_backend ............................. nccl
+  distributed_timeout_minutes ..................... 120
+  embedding_path .................................. None
+  empty_unused_memory_level ....................... 0
+  enable_ft_package ............................... False
+  enable_one_logger ............................... True
+  encoder_num_layers .............................. 80
+  encoder_pipeline_model_parallel_size ............ 0
+  encoder_seq_length .............................. 4096
+  encoder_tensor_model_parallel_size .............. 0
+  end_weight_decay ................................ 0.1
+  eod_mask_loss ................................... False
+  eval_interval ................................... 320000
+  eval_iters ...................................... -1
+  evidence_data_path .............................. None
+  exit_duration_in_mins ........................... None
+  exit_interval ................................... None
+  exit_on_missing_checkpoint ...................... False
+  exit_signal_handler ............................. False
+  expert_model_parallel_size ...................... 1
+  ffn_hidden_size ................................. 28672
+  finetune ........................................ False
+  fp16 ............................................ False
+  fp16_lm_cross_entropy ........................... False
+  fp32_residual_connection ........................ False
+  fp8 ............................................. None
+  fp8_amax_compute_algo ........................... most_recent
+  fp8_amax_history_len ............................ 1
+  fp8_interval .................................... 1
+  fp8_margin ...................................... 0
+  fp8_param_gather ................................ False
+  fp8_wgrad ....................................... True
+  global_batch_size ............................... 2048
+  gradient_accumulation_fusion .................... False
+  group_query_attention ........................... True
+  head_lr_mult .................................... 1.0
+  hidden_dropout .................................. 0.0
+  hidden_size ..................................... 8192
+  hybrid_attention_ratio .......................... 0.0
+  hybrid_mlp_ratio ................................ 0.0
+  hybrid_override_pattern ......................... None
+  hysteresis ...................................... 2
+  ict_head_size ................................... None
+  ict_load ........................................ None
+  img_h ........................................... 224
+  img_w ........................................... 224
+  indexer_batch_size .............................. 128
+  indexer_log_interval ............................ 1000
+  inference_batch_times_seqlen_threshold .......... 512
+  init_method_std ................................. 0.02
+  init_method_xavier_uniform ...................... False
+  initial_loss_scale .............................. 4294967296
+  iter_per_epoch .................................. 1250
+  kv_channels ..................................... 128
+  kv_lora_rank .................................... 32
+  lazy_mpu_init ................................... None
+  load ............................................ None
+  local_rank ...................................... 0
+  log_interval .................................... 1
+  log_loss_scale_to_tensorboard ................... True
+  log_memory_to_tensorboard ....................... False
+  log_num_zeros_in_grad ........................... False
+  log_params_norm ................................. False
+  log_progress .................................... False
+  log_straggler ................................... False
+  log_throughput .................................. True
+  log_timers_to_tensorboard ....................... False
+  log_validation_ppl_to_tensorboard ............... False
+  log_world_size_to_tensorboard ................... False
+  logging_level ................................... None
+  loss_scale ...................................... None
+  loss_scale_window ............................... 1000
+  lr .............................................. 0.0001
+  lr_decay_iters .................................. 320000
+  lr_decay_samples ................................ None
+  lr_decay_style .................................. cosine
+  lr_warmup_fraction .............................. None
+  lr_warmup_init .................................. 0.0
+  lr_warmup_iters ................................. 0
+  lr_warmup_samples ............................... 0
+  lr_wsd_decay_iters .............................. None
+  lr_wsd_decay_samples ............................ None
+  lr_wsd_decay_style .............................. exponential
+  make_vocab_size_divisible_by .................... 128
+  manual_gc ....................................... False
+  manual_gc_eval .................................. True
+  manual_gc_interval .............................. 0
+  mask_factor ..................................... 1.0
+  mask_prob ....................................... 0.15
+  mask_type ....................................... random
+  masked_softmax_fusion ........................... False
+  max_position_embeddings ......................... 128000
+  max_tokens_to_oom ............................... 12000
+  merge_file ...................................... None
+  micro_batch_size ................................ 8
+  min_loss_scale .................................. 1.0
+  min_lr .......................................... 1e-05
+  mmap_bin_files .................................. True
+  mock_data ....................................... False
+  moe_aux_loss_coeff .............................. 0.0
+  moe_expert_capacity_factor ...................... None
+  moe_extended_tp ................................. False
+  moe_grouped_gemm ................................ False
+  moe_input_jitter_eps ............................ None
+  moe_layer_recompute ............................. False
+  moe_pad_expert_input_to_capacity ................ False
+  moe_per_layer_logging ........................... False
+  moe_router_load_balancing_type .................. aux_loss
+  moe_router_pre_softmax .......................... False
+  moe_router_topk ................................. 2
+  moe_shared_expert_intermediate_size ............. None
+  moe_shared_expert_overlap ....................... False
+  moe_token_dispatcher_type ....................... allgather
+  moe_token_drop_policy ........................... probs
+  moe_use_upcycling ............................... False
+  moe_z_loss_coeff ................................ None
+  multi_latent_attention .......................... False
+  nccl_communicator_config_path ................... None
+  no_load_optim ................................... None
+  no_load_rng ..................................... None
+  no_persist_layer_norm ........................... False
+  no_save_optim ................................... True
+  no_save_rng ..................................... None
+  non_persistent_ckpt_type ........................ None
+  non_persistent_global_ckpt_dir .................. None
+  non_persistent_local_ckpt_algo .................. fully_parallel
+  non_persistent_local_ckpt_dir ................... None
+  non_persistent_save_interval .................... None
+  norm_epsilon .................................... 1e-05
+  normalization ................................... RMSNorm
+  num_attention_heads ............................. 64
+  num_channels .................................... 3
+  num_classes ..................................... 1000
+  num_dataset_builder_threads ..................... 1
+  num_experts ..................................... None
+  num_layers ...................................... 80
+  num_layers_per_virtual_pipeline_stage ........... None
+  num_query_groups ................................ 8
+  num_workers ..................................... 8
+  one_logger_async ................................ False
+  one_logger_project .............................. megatron-lm
+  one_logger_run_name ............................. None
+  onnx_safe ....................................... None
+  openai_gelu ..................................... False
+  optimizer ....................................... sgd
+  output_bert_embeddings .......................... False
+  overlap_grad_reduce ............................. True
+  overlap_p2p_comm ................................ False
+  overlap_param_gather ............................ True
+  overlap_param_gather_with_optimizer_step ........ False
+  override_opt_param_scheduler .................... False
+  params_dtype .................................... torch.bfloat16
+  patch_dim ....................................... 16
+  perform_initialization .......................... True
+  pipeline_model_parallel_size .................... 1
+  pipeline_model_parallel_split_rank .............. None
+  position_embedding_type ......................... rope
+  pretrained_checkpoint ........................... None
+  profile ......................................... False
+  profile_ranks ................................... [0]
+  profile_step_end ................................ 12
+  profile_step_start .............................. 10
+  q_lora_rank ..................................... None
+  qk_head_dim ..................................... 128
+  qk_layernorm .................................... False
+  qk_pos_emb_head_dim ............................. 64
+  query_in_block_prob ............................. 0.1
+  rampup_batch_size ............................... None
+  rank ............................................ 0
+  recompute_granularity ........................... None
+  recompute_method ................................ None
+  recompute_num_layers ............................ None
+  renormalize_blend_weights ....................... False
+  reset_attention_mask ............................ False
+  reset_position_ids .............................. False
+  retriever_report_topk_accuracies ................ []
+  retriever_score_scaling ......................... False
+  retriever_seq_length ............................ 256
+  retro_add_retriever ............................. False
+  retro_attention_gate ............................ 1
+  retro_cyclic_train_iters ........................ None
+  retro_encoder_attention_dropout ................. 0.1
+  retro_encoder_hidden_dropout .................... 0.1
+  retro_encoder_layers ............................ 2
+  retro_num_neighbors ............................. 2
+  retro_num_retrieved_chunks ...................... 2
+  retro_project_dir ............................... None
+  retro_verify_neighbor_count ..................... True
+  rotary_base ..................................... 10000
+  rotary_interleaved .............................. False
+  rotary_percent .................................. 1.0
+  rotary_scaling_factor ........................... 1.0
+  rotary_seq_len_interpolation_factor ............. None
+  s3_cache_path ................................... None
+  sample_rate ..................................... 1.0
+  save ............................................ None
+  save_interval ................................... 5000
+  scatter_gather_tensors_in_pipeline .............. True
+  seed ............................................ 1234
+  seq_length ...................................... 4096
+  sequence_parallel ............................... True
+  sgd_momentum .................................... 0.9
+  short_seq_prob .................................. 0.1
+  skip_train ...................................... False
+  skipped_train_samples ........................... 0
+  spec ............................................ None
+  split ........................................... 969, 30, 1
+  squared_relu .................................... False
+  standalone_embedding_stage ...................... False
+  start_weight_decay .............................. 0.1
+  straggler_ctrlr_port ............................ 65535
+  straggler_minmax_count .......................... 1
+  swiglu .......................................... True
+  swin_backbone_type .............................. tiny
+  tensor_model_parallel_size ...................... 8
+  tensorboard_dir ................................. experiment/4nodes_rank0_train_70B_mbs8_bs2048_tp8_pp1_cp1_iter5/nocompile1_TE_FP8_0/2024-11-14_19-45-03
+  tensorboard_log_interval ........................ 1
+  tensorboard_queue_size .......................... 1000
+  test_data_path .................................. None
+  test_mode ....................................... False
+  tiktoken_num_special_tokens ..................... 1000
+  tiktoken_pattern ................................ None
+  tiktoken_special_tokens ......................... None
+  timing_log_level ................................ 0
+  timing_log_option ............................... minmax
+  titles_data_path ................................ None
+  tokenizer_model ................................. experiment/tokenizer.model
+  tokenizer_type .................................. Llama2Tokenizer
+  tp_comm_bootstrap_backend ....................... nccl
+  tp_comm_bulk_dgrad .............................. True
+  tp_comm_bulk_wgrad .............................. True
+  tp_comm_overlap ................................. False
+  tp_comm_overlap_ag .............................. True
+  tp_comm_overlap_cfg ............................. None
+  tp_comm_overlap_rs .............................. True
+  tp_comm_overlap_rs_dgrad ........................ False
+  tp_comm_split_ag ................................ True
+  tp_comm_split_rs ................................ True
+  train_data_path ................................. None
+  train_iters ..................................... 5
+  train_samples ................................... None
+  train_sync_interval ............................. None
+  transformer_impl ................................ transformer_engine
+  transformer_pipeline_model_parallel_size ........ 1
+  untie_embeddings_and_output_weights ............. True
+  use_checkpoint_args ............................. False
+  use_checkpoint_opt_param_scheduler .............. False
+  use_cpu_initialization .......................... None
+  use_dist_ckpt ................................... True
+  use_dist_ckpt_deprecated ........................ False
+  use_distributed_optimizer ....................... True
+  use_flash_attn .................................. True
+  use_legacy_models ............................... False
+  use_one_sent_docs ............................... False
+  use_pytorch_profiler ............................ False
+  use_ring_exchange_p2p ........................... False
+  use_rope_scaling ................................ False
+  use_rotary_position_embeddings .................. False
+  use_tp_pp_dp_mapping ............................ False
+  v_head_dim ...................................... 128
+  valid_data_path ................................. None
+  variable_seq_lengths ............................ False
+  virtual_pipeline_model_parallel_size ............ None
+  vision_backbone_type ............................ vit
+  vision_pretraining .............................. False
+  vision_pretraining_type ......................... classify
+  vocab_extra_ids ................................. 0
+  vocab_file ...................................... None
+  vocab_size ...................................... None
+  wandb_exp_name .................................. 
+  wandb_project ................................... 
+  wandb_save_dir .................................. 
+  weight_decay .................................... 0.1
+  weight_decay_incr_style ......................... constant
+  wgrad_deferral_limit ............................ 0
+  world_size ...................................... 32
+  yaml_cfg ........................................ None
+-------------------- end of arguments ---------------------
+INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to constant 64
+> building Llama2Tokenizer tokenizer ...
+ > padded vocab (size: 32000) with 768 dummy tokens (new size: 32768)
+> initializing torch distributed ...
+> initialized tensor model parallel with size 8
+> initialized pipeline model parallel with size 1
+> setting random seeds to 1234 ...
+> compiling dataset index builder ...
+make: Entering directory '/root/.cache/Megatron-LM/megatron/core/datasets'
+make: Nothing to be done for 'default'.
+make: Leaving directory '/root/.cache/Megatron-LM/megatron/core/datasets'
+>>> done with dataset index builder. Compilation time: 0.054 seconds
+WARNING: constraints for invoking optimized fused softmax kernel are not met. We default back to unfused kernel invocations.
+> compiling and loading fused kernels ...
+>>> done with compiling and loading fused kernels. Compilation time: 0.659 seconds
+[rank1]:[W1114 19:45:35.490939232 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank6]:[W1114 19:45:35.490965181 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank4]:[W1114 19:45:35.490963658 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank2]:[W1114 19:45:35.490965010 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank3]:[W1114 19:45:35.490965852 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank5]:[W1114 19:45:35.490970679 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank7]:[W1114 19:45:35.490996537 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank0]:[W1114 19:45:35.491106791 init.cpp:767] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+time to initialize megatron (seconds): 4.619
+[after megatron is initialized] datetime: 2024-11-14 19:45:38 
+building GPT model ...
+ > number of parameters on (tensor, pipeline) model parallel rank (4, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (5, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (2, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (6, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (7, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (3, 0): 8624807936
+ > number of parameters on (tensor, pipeline) model parallel rank (1, 0): 8624807936
+INFO:megatron.core.distributed.distributed_data_parallel:Setting up DistributedDataParallel with config DistributedDataParallelConfig(grad_reduce_in_fp32=True, overlap_grad_reduce=True, overlap_param_gather=True, align_param_gather=False, use_distributed_optimizer=True, check_for_nan_in_grad=True, bucket_size=40000000, average_in_collective=False, fp8_param_gather=False)
+INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 161
+Params for bucket 1 (62922752 elements):
+	module.output_layer.weight
+	module.decoder.layers.79.mlp.linear_fc2.weight
+	module.decoder.final_layernorm.weight
+Params for bucket 2 (58720256 elements):
+	module.decoder.layers.79.mlp.linear_fc1.weight
+Params for bucket 3 (48250880 elements):
+	module.decoder.layers.79.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.79.self_attention.linear_qkv.weight
+	module.decoder.layers.79.self_attention.linear_proj.weight
+	module.decoder.layers.78.mlp.linear_fc2.weight
+	module.decoder.layers.79.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 4 (58720256 elements):
+	module.decoder.layers.78.mlp.linear_fc1.weight
+Params for bucket 5 (48250880 elements):
+	module.decoder.layers.78.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.78.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.77.mlp.linear_fc2.weight
+	module.decoder.layers.78.self_attention.linear_qkv.weight
+	module.decoder.layers.78.self_attention.linear_proj.weight
+Params for bucket 6 (58720256 elements):
+	module.decoder.layers.77.mlp.linear_fc1.weight
+Params for bucket 7 (48250880 elements):
+	module.decoder.layers.77.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.76.mlp.linear_fc2.weight
+	module.decoder.layers.77.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.77.self_attention.linear_proj.weight
+	module.decoder.layers.77.self_attention.linear_qkv.weight
+Params for bucket 8 (58720256 elements):
+	module.decoder.layers.76.mlp.linear_fc1.weight
+Params for bucket 9 (48250880 elements):
+	module.decoder.layers.76.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.76.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.75.mlp.linear_fc2.weight
+	module.decoder.layers.76.self_attention.linear_qkv.weight
+	module.decoder.layers.76.self_attention.linear_proj.weight
+Params for bucket 10 (58720256 elements):
+	module.decoder.layers.75.mlp.linear_fc1.weight
+Params for bucket 11 (48250880 elements):
+	module.decoder.layers.75.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.75.self_attention.linear_proj.weight
+	module.decoder.layers.75.self_attention.linear_qkv.weight
+	module.decoder.layers.74.mlp.linear_fc2.weight
+	module.decoder.layers.75.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 12 (58720256 elements):
+	module.decoder.layers.74.mlp.linear_fc1.weight
+Params for bucket 13 (48250880 elements):
+	module.decoder.layers.74.self_attention.linear_qkv.weight
+	module.decoder.layers.74.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.74.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.74.self_attention.linear_proj.weight
+	module.decoder.layers.73.mlp.linear_fc2.weight
+Params for bucket 14 (58720256 elements):
+	module.decoder.layers.73.mlp.linear_fc1.weight
+Params for bucket 15 (48250880 elements):
+	module.decoder.layers.73.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.72.mlp.linear_fc2.weight
+	module.decoder.layers.73.self_attention.linear_proj.weight
+	module.decoder.layers.73.self_attention.linear_qkv.weight
+	module.decoder.layers.73.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 16 (58720256 elements):
+	module.decoder.layers.72.mlp.linear_fc1.weight
+Params for bucket 17 (48250880 elements):
+	module.decoder.layers.72.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.71.mlp.linear_fc2.weight
+	module.decoder.layers.72.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.72.self_attention.linear_qkv.weight
+	module.decoder.layers.72.self_attention.linear_proj.weight
+Params for bucket 18 (58720256 elements):
+	module.decoder.layers.71.mlp.linear_fc1.weight
+Params for bucket 19 (48250880 elements):
+	module.decoder.layers.71.self_attention.linear_qkv.weight
+	module.decoder.layers.71.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.71.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.71.self_attention.linear_proj.weight
+	module.decoder.layers.70.mlp.linear_fc2.weight
+Params for bucket 20 (58720256 elements):
+	module.decoder.layers.70.mlp.linear_fc1.weight
+Params for bucket 21 (48250880 elements):
+	module.decoder.layers.70.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.70.self_attention.linear_qkv.weight
+	module.decoder.layers.70.self_attention.linear_proj.weight
+	module.decoder.layers.69.mlp.linear_fc2.weight
+	module.decoder.layers.70.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 22 (58720256 elements):
+	module.decoder.layers.69.mlp.linear_fc1.weight
+Params for bucket 23 (48250880 elements):
+	module.decoder.layers.69.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.69.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.69.self_attention.linear_qkv.weight
+	module.decoder.layers.69.self_attention.linear_proj.weight
+	module.decoder.layers.68.mlp.linear_fc2.weight
+Params for bucket 24 (58720256 elements):
+	module.decoder.layers.68.mlp.linear_fc1.weight
+Params for bucket 25 (48250880 elements):
+	module.decoder.layers.68.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.67.mlp.linear_fc2.weight
+	module.decoder.layers.68.self_attention.linear_qkv.weight
+	module.decoder.layers.68.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.68.self_attention.linear_proj.weight
+Params for bucket 26 (58720256 elements):
+	module.decoder.layers.67.mlp.linear_fc1.weight
+Params for bucket 27 (48250880 elements):
+	module.decoder.layers.67.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.67.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.67.self_attention.linear_qkv.weight
+	module.decoder.layers.67.self_attention.linear_proj.weight
+	module.decoder.layers.66.mlp.linear_fc2.weight
+Params for bucket 28 (58720256 elements):
+	module.decoder.layers.66.mlp.linear_fc1.weight
+Params for bucket 29 (48250880 elements):
+	module.decoder.layers.66.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.65.mlp.linear_fc2.weight
+	module.decoder.layers.66.self_attention.linear_qkv.weight
+	module.decoder.layers.66.self_attention.linear_proj.weight
+	module.decoder.layers.66.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 30 (58720256 elements):
+	module.decoder.layers.65.mlp.linear_fc1.weight
+Params for bucket 31 (48250880 elements):
+	module.decoder.layers.65.self_attention.linear_proj.weight
+	module.decoder.layers.65.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.65.self_attention.linear_qkv.weight
+	module.decoder.layers.64.mlp.linear_fc2.weight
+	module.decoder.layers.65.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 32 (58720256 elements):
+	module.decoder.layers.64.mlp.linear_fc1.weight
+Params for bucket 33 (48250880 elements):
+	module.decoder.layers.64.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.64.self_attention.linear_proj.weight
+	module.decoder.layers.63.mlp.linear_fc2.weight
+	module.decoder.layers.64.self_attention.linear_qkv.weight
+	module.decoder.layers.64.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 34 (58720256 elements):
+	module.decoder.layers.63.mlp.linear_fc1.weight
+Params for bucket 35 (48250880 elements):
+	module.decoder.layers.63.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.63.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.63.self_attention.linear_proj.weight
+	module.decoder.layers.62.mlp.linear_fc2.weight
+	module.decoder.layers.63.self_attention.linear_qkv.weight
+Params for bucket 36 (58720256 elements):
+	module.decoder.layers.62.mlp.linear_fc1.weight
+Params for bucket 37 (48250880 elements):
+	module.decoder.layers.62.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.62.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.62.self_attention.linear_proj.weight
+	module.decoder.layers.62.self_attention.linear_qkv.weight
+	module.decoder.layers.61.mlp.linear_fc2.weight
+Params for bucket 38 (58720256 elements):
+	module.decoder.layers.61.mlp.linear_fc1.weight
+Params for bucket 39 (48250880 elements):
+	module.decoder.layers.61.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.61.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.61.self_attention.linear_proj.weight
+	module.decoder.layers.60.mlp.linear_fc2.weight
+	module.decoder.layers.61.self_attention.linear_qkv.weight
+Params for bucket 40 (58720256 elements):
+	module.decoder.layers.60.mlp.linear_fc1.weight
+Params for bucket 41 (48250880 elements):
+	module.decoder.layers.60.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.59.mlp.linear_fc2.weight
+	module.decoder.layers.60.self_attention.linear_qkv.weight
+	module.decoder.layers.60.self_attention.linear_proj.weight
+	module.decoder.layers.60.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 42 (58720256 elements):
+	module.decoder.layers.59.mlp.linear_fc1.weight
+Params for bucket 43 (48250880 elements):
+	module.decoder.layers.59.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.58.mlp.linear_fc2.weight
+	module.decoder.layers.59.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.59.self_attention.linear_proj.weight
+	module.decoder.layers.59.self_attention.linear_qkv.weight
+Params for bucket 44 (58720256 elements):
+	module.decoder.layers.58.mlp.linear_fc1.weight
+Params for bucket 45 (48250880 elements):
+	module.decoder.layers.58.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.58.self_attention.linear_qkv.weight
+	module.decoder.layers.58.self_attention.linear_proj.weight
+	module.decoder.layers.57.mlp.linear_fc2.weight
+	module.decoder.layers.58.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 46 (58720256 elements):
+	module.decoder.layers.57.mlp.linear_fc1.weight
+Params for bucket 47 (48250880 elements):
+	module.decoder.layers.57.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.57.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.56.mlp.linear_fc2.weight
+	module.decoder.layers.57.self_attention.linear_qkv.weight
+	module.decoder.layers.57.self_attention.linear_proj.weight
+Params for bucket 48 (58720256 elements):
+	module.decoder.layers.56.mlp.linear_fc1.weight
+Params for bucket 49 (48250880 elements):
+	module.decoder.layers.56.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.56.self_attention.linear_qkv.weight
+	module.decoder.layers.55.mlp.linear_fc2.weight
+	module.decoder.layers.56.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.56.self_attention.linear_proj.weight
+Params for bucket 50 (58720256 elements):
+	module.decoder.layers.55.mlp.linear_fc1.weight
+Params for bucket 51 (48250880 elements):
+	module.decoder.layers.55.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.55.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.54.mlp.linear_fc2.weight
+	module.decoder.layers.55.self_attention.linear_qkv.weight
+	module.decoder.layers.55.self_attention.linear_proj.weight
+Params for bucket 52 (58720256 elements):
+	module.decoder.layers.54.mlp.linear_fc1.weight
+Params for bucket 53 (48250880 elements):
+	module.decoder.layers.54.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.54.self_attention.linear_proj.weight
+	module.decoder.layers.53.mlp.linear_fc2.weight
+	module.decoder.layers.54.self_attention.linear_qkv.weight
+	module.decoder.layers.54.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 54 (58720256 elements):
+	module.decoder.layers.53.mlp.linear_fc1.weight
+Params for bucket 55 (48250880 elements):
+	module.decoder.layers.53.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.53.self_attention.linear_proj.weight
+	module.decoder.layers.53.self_attention.linear_qkv.weight
+	module.decoder.layers.52.mlp.linear_fc2.weight
+	module.decoder.layers.53.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 56 (58720256 elements):
+	module.decoder.layers.52.mlp.linear_fc1.weight
+Params for bucket 57 (48250880 elements):
+	module.decoder.layers.52.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.52.self_attention.linear_proj.weight
+	module.decoder.layers.51.mlp.linear_fc2.weight
+	module.decoder.layers.52.self_attention.linear_qkv.weight
+	module.decoder.layers.52.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 58 (58720256 elements):
+	module.decoder.layers.51.mlp.linear_fc1.weight
+Params for bucket 59 (48250880 elements):
+	module.decoder.layers.51.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.50.mlp.linear_fc2.weight
+	module.decoder.layers.51.self_attention.linear_proj.weight
+	module.decoder.layers.51.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.51.self_attention.linear_qkv.weight
+Params for bucket 60 (58720256 elements):
+	module.decoder.layers.50.mlp.linear_fc1.weight
+Params for bucket 61 (48250880 elements):
+	module.decoder.layers.50.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.50.self_attention.linear_proj.weight
+	module.decoder.layers.50.self_attention.linear_qkv.weight
+	module.decoder.layers.49.mlp.linear_fc2.weight
+	module.decoder.layers.50.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 62 (58720256 elements):
+	module.decoder.layers.49.mlp.linear_fc1.weight
+Params for bucket 63 (48250880 elements):
+	module.decoder.layers.49.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.49.self_attention.linear_proj.weight
+	module.decoder.layers.48.mlp.linear_fc2.weight
+	module.decoder.layers.49.self_attention.linear_qkv.weight
+	module.decoder.layers.49.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 64 (58720256 elements):
+	module.decoder.layers.48.mlp.linear_fc1.weight
+Params for bucket 65 (48250880 elements):
+	module.decoder.layers.48.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.48.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.48.self_attention.linear_qkv.weight
+	module.decoder.layers.48.self_attention.linear_proj.weight
+	module.decoder.layers.47.mlp.linear_fc2.weight
+Params for bucket 66 (58720256 elements):
+	module.decoder.layers.47.mlp.linear_fc1.weight
+Params for bucket 67 (48250880 elements):
+	module.decoder.layers.47.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.46.mlp.linear_fc2.weight
+	module.decoder.layers.47.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.47.self_attention.linear_proj.weight
+	module.decoder.layers.47.self_attention.linear_qkv.weight
+Params for bucket 68 (58720256 elements):
+	module.decoder.layers.46.mlp.linear_fc1.weight
+Params for bucket 69 (48250880 elements):
+	module.decoder.layers.46.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.46.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.46.self_attention.linear_qkv.weight
+	module.decoder.layers.46.self_attention.linear_proj.weight
+	module.decoder.layers.45.mlp.linear_fc2.weight
+Params for bucket 70 (58720256 elements):
+	module.decoder.layers.45.mlp.linear_fc1.weight
+Params for bucket 71 (48250880 elements):
+	module.decoder.layers.45.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.44.mlp.linear_fc2.weight
+	module.decoder.layers.45.self_attention.linear_qkv.weight
+	module.decoder.layers.45.self_attention.linear_proj.weight
+	module.decoder.layers.45.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 72 (58720256 elements):
+	module.decoder.layers.44.mlp.linear_fc1.weight
+Params for bucket 73 (48250880 elements):
+	module.decoder.layers.44.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.44.self_attention.linear_qkv.weight
+	module.decoder.layers.43.mlp.linear_fc2.weight
+	module.decoder.layers.44.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.44.self_attention.linear_proj.weight
+Params for bucket 74 (58720256 elements):
+	module.decoder.layers.43.mlp.linear_fc1.weight
+Params for bucket 75 (48250880 elements):
+	module.decoder.layers.43.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.42.mlp.linear_fc2.weight
+	module.decoder.layers.43.self_attention.linear_qkv.weight
+	module.decoder.layers.43.self_attention.linear_proj.weight
+	module.decoder.layers.43.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 76 (58720256 elements):
+	module.decoder.layers.42.mlp.linear_fc1.weight
+Params for bucket 77 (48250880 elements):
+	module.decoder.layers.42.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.42.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.42.self_attention.linear_proj.weight
+	module.decoder.layers.41.mlp.linear_fc2.weight
+	module.decoder.layers.42.self_attention.linear_qkv.weight
+Params for bucket 78 (58720256 elements):
+	module.decoder.layers.41.mlp.linear_fc1.weight
+Params for bucket 79 (48250880 elements):
+	module.decoder.layers.41.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.41.self_attention.linear_proj.weight
+	module.decoder.layers.41.self_attention.linear_qkv.weight
+	module.decoder.layers.40.mlp.linear_fc2.weight
+	module.decoder.layers.41.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 80 (58720256 elements):
+	module.decoder.layers.40.mlp.linear_fc1.weight
+Params for bucket 81 (48250880 elements):
+	module.decoder.layers.40.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.40.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.40.self_attention.linear_proj.weight
+	module.decoder.layers.39.mlp.linear_fc2.weight
+	module.decoder.layers.40.self_attention.linear_qkv.weight
+Params for bucket 82 (58720256 elements):
+	module.decoder.layers.39.mlp.linear_fc1.weight
+Params for bucket 83 (48250880 elements):
+	module.decoder.layers.39.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.39.self_attention.linear_qkv.weight
+	module.decoder.layers.39.self_attention.linear_proj.weight
+	module.decoder.layers.38.mlp.linear_fc2.weight
+	module.decoder.layers.39.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 84 (58720256 elements):
+	module.decoder.layers.38.mlp.linear_fc1.weight
+Params for bucket 85 (48250880 elements):
+	module.decoder.layers.38.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.38.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.38.self_attention.linear_proj.weight
+	module.decoder.layers.37.mlp.linear_fc2.weight
+	module.decoder.layers.38.self_attention.linear_qkv.weight
+Params for bucket 86 (58720256 elements):
+	module.decoder.layers.37.mlp.linear_fc1.weight
+Params for bucket 87 (48250880 elements):
+	module.decoder.layers.37.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.37.self_attention.linear_qkv.weight
+	module.decoder.layers.37.self_attention.linear_proj.weight
+	module.decoder.layers.36.mlp.linear_fc2.weight
+	module.decoder.layers.37.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 88 (58720256 elements):
+	module.decoder.layers.36.mlp.linear_fc1.weight
+Params for bucket 89 (48250880 elements):
+	module.decoder.layers.36.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.36.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.36.self_attention.linear_qkv.weight
+	module.decoder.layers.36.self_attention.linear_proj.weight
+	module.decoder.layers.35.mlp.linear_fc2.weight
+Params for bucket 90 (58720256 elements):
+	module.decoder.layers.35.mlp.linear_fc1.weight
+Params for bucket 91 (48250880 elements):
+	module.decoder.layers.35.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.35.self_attention.linear_qkv.weight
+	module.decoder.layers.34.mlp.linear_fc2.weight
+	module.decoder.layers.35.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.35.self_attention.linear_proj.weight
+Params for bucket 92 (58720256 elements):
+	module.decoder.layers.34.mlp.linear_fc1.weight
+Params for bucket 93 (48250880 elements):
+	module.decoder.layers.34.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.34.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.34.self_attention.linear_qkv.weight
+	module.decoder.layers.33.mlp.linear_fc2.weight
+	module.decoder.layers.34.self_attention.linear_proj.weight
+Params for bucket 94 (58720256 elements):
+	module.decoder.layers.33.mlp.linear_fc1.weight
+Params for bucket 95 (48250880 elements):
+	module.decoder.layers.33.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.33.self_attention.linear_proj.weight
+	module.decoder.layers.32.mlp.linear_fc2.weight
+	module.decoder.layers.33.self_attention.linear_qkv.weight
+	module.decoder.layers.33.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 96 (58720256 elements):
+	module.decoder.layers.32.mlp.linear_fc1.weight
+Params for bucket 97 (48250880 elements):
+	module.decoder.layers.32.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.32.self_attention.linear_qkv.weight
+	module.decoder.layers.31.mlp.linear_fc2.weight
+	module.decoder.layers.32.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.32.self_attention.linear_proj.weight
+Params for bucket 98 (58720256 elements):
+	module.decoder.layers.31.mlp.linear_fc1.weight
+Params for bucket 99 (48250880 elements):
+	module.decoder.layers.31.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.31.self_attention.linear_proj.weight
+	module.decoder.layers.30.mlp.linear_fc2.weight
+	module.decoder.layers.31.self_attention.linear_qkv.weight
+	module.decoder.layers.31.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 100 (58720256 elements):
+	module.decoder.layers.30.mlp.linear_fc1.weight
+Params for bucket 101 (48250880 elements):
+	module.decoder.layers.30.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.30.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.30.self_attention.linear_qkv.weight
+	module.decoder.layers.29.mlp.linear_fc2.weight
+	module.decoder.layers.30.self_attention.linear_proj.weight
+Params for bucket 102 (58720256 elements):
+	module.decoder.layers.29.mlp.linear_fc1.weight
+Params for bucket 103 (48250880 elements):
+	module.decoder.layers.29.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.29.self_attention.linear_proj.weight
+	module.decoder.layers.28.mlp.linear_fc2.weight
+	module.decoder.layers.29.self_attention.linear_qkv.weight
+	module.decoder.layers.29.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 104 (58720256 elements):
+	module.decoder.layers.28.mlp.linear_fc1.weight
+Params for bucket 105 (48250880 elements):
+	module.decoder.layers.28.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.28.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.28.self_attention.linear_proj.weight
+	module.decoder.layers.27.mlp.linear_fc2.weight
+	module.decoder.layers.28.self_attention.linear_qkv.weight
+Params for bucket 106 (58720256 elements):
+	module.decoder.layers.27.mlp.linear_fc1.weight
+Params for bucket 107 (48250880 elements):
+	module.decoder.layers.27.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.26.mlp.linear_fc2.weight
+	module.decoder.layers.27.self_attention.linear_proj.weight
+	module.decoder.layers.27.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.27.self_attention.linear_qkv.weight
+Params for bucket 108 (58720256 elements):
+	module.decoder.layers.26.mlp.linear_fc1.weight
+Params for bucket 109 (48250880 elements):
+	module.decoder.layers.26.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.26.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.26.self_attention.linear_qkv.weight
+	module.decoder.layers.26.self_attention.linear_proj.weight
+	module.decoder.layers.25.mlp.linear_fc2.weight
+Params for bucket 110 (58720256 elements):
+	module.decoder.layers.25.mlp.linear_fc1.weight
+Params for bucket 111 (48250880 elements):
+	module.decoder.layers.25.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.24.mlp.linear_fc2.weight
+	module.decoder.layers.25.self_attention.linear_qkv.weight
+	module.decoder.layers.25.self_attention.linear_proj.weight
+	module.decoder.layers.25.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 112 (58720256 elements):
+	module.decoder.layers.24.mlp.linear_fc1.weight
+Params for bucket 113 (48250880 elements):
+	module.decoder.layers.24.self_attention.linear_qkv.weight
+	module.decoder.layers.24.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.23.mlp.linear_fc2.weight
+	module.decoder.layers.24.self_attention.linear_proj.weight
+	module.decoder.layers.24.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 114 (58720256 elements):
+	module.decoder.layers.23.mlp.linear_fc1.weight
+Params for bucket 115 (48250880 elements):
+	module.decoder.layers.23.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.23.self_attention.linear_qkv.weight
+	module.decoder.layers.22.mlp.linear_fc2.weight
+	module.decoder.layers.23.self_attention.linear_proj.weight
+	module.decoder.layers.23.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 116 (58720256 elements):
+	module.decoder.layers.22.mlp.linear_fc1.weight
+Params for bucket 117 (48250880 elements):
+	module.decoder.layers.22.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.22.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.21.mlp.linear_fc2.weight
+	module.decoder.layers.22.self_attention.linear_proj.weight
+	module.decoder.layers.22.self_attention.linear_qkv.weight
+Params for bucket 118 (58720256 elements):
+	module.decoder.layers.21.mlp.linear_fc1.weight
+Params for bucket 119 (48250880 elements):
+	module.decoder.layers.21.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.21.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.20.mlp.linear_fc2.weight
+	module.decoder.layers.21.self_attention.linear_proj.weight
+	module.decoder.layers.21.self_attention.linear_qkv.weight
+Params for bucket 120 (58720256 elements):
+	module.decoder.layers.20.mlp.linear_fc1.weight
+Params for bucket 121 (48250880 elements):
+	module.decoder.layers.20.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.20.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.19.mlp.linear_fc2.weight
+	module.decoder.layers.20.self_attention.linear_qkv.weight
+	module.decoder.layers.20.self_attention.linear_proj.weight
+Params for bucket 122 (58720256 elements):
+	module.decoder.layers.19.mlp.linear_fc1.weight
+Params for bucket 123 (48250880 elements):
+	module.decoder.layers.19.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.19.self_attention.linear_proj.weight
+	module.decoder.layers.18.mlp.linear_fc2.weight
+	module.decoder.layers.19.self_attention.linear_qkv.weight
+	module.decoder.layers.19.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 124 (58720256 elements):
+	module.decoder.layers.18.mlp.linear_fc1.weight
+Params for bucket 125 (48250880 elements):
+	module.decoder.layers.18.self_attention.linear_qkv.weight
+	module.decoder.layers.18.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.18.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.18.self_attention.linear_proj.weight
+	module.decoder.layers.17.mlp.linear_fc2.weight
+Params for bucket 126 (58720256 elements):
+	module.decoder.layers.17.mlp.linear_fc1.weight
+Params for bucket 127 (48250880 elements):
+	module.decoder.layers.17.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.16.mlp.linear_fc2.weight
+	module.decoder.layers.17.self_attention.linear_proj.weight
+	module.decoder.layers.17.self_attention.linear_qkv.weight
+	module.decoder.layers.17.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 128 (58720256 elements):
+	module.decoder.layers.16.mlp.linear_fc1.weight
+Params for bucket 129 (48250880 elements):
+	module.decoder.layers.16.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.16.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.16.self_attention.linear_qkv.weight
+	module.decoder.layers.16.self_attention.linear_proj.weight
+	module.decoder.layers.15.mlp.linear_fc2.weight
+Params for bucket 130 (58720256 elements):
+	module.decoder.layers.15.mlp.linear_fc1.weight
+Params for bucket 131 (48250880 elements):
+	module.decoder.layers.15.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.14.mlp.linear_fc2.weight
+	module.decoder.layers.15.self_attention.linear_qkv.weight
+	module.decoder.layers.15.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.15.self_attention.linear_proj.weight
+Params for bucket 132 (58720256 elements):
+	module.decoder.layers.14.mlp.linear_fc1.weight
+Params for bucket 133 (48250880 elements):
+	module.decoder.layers.14.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.14.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.14.self_attention.linear_qkv.weight
+	module.decoder.layers.14.self_attention.linear_proj.weight
+	module.decoder.layers.13.mlp.linear_fc2.weight
+Params for bucket 134 (58720256 elements):
+	module.decoder.layers.13.mlp.linear_fc1.weight
+Params for bucket 135 (48250880 elements):
+	module.decoder.layers.13.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.12.mlp.linear_fc2.weight
+	module.decoder.layers.13.self_attention.linear_qkv.weight
+	module.decoder.layers.13.self_attention.linear_proj.weight
+	module.decoder.layers.13.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 136 (58720256 elements):
+	module.decoder.layers.12.mlp.linear_fc1.weight
+Params for bucket 137 (48250880 elements):
+	module.decoder.layers.12.self_attention.linear_proj.weight
+	module.decoder.layers.12.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.12.self_attention.linear_qkv.weight
+	module.decoder.layers.11.mlp.linear_fc2.weight
+	module.decoder.layers.12.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 138 (58720256 elements):
+	module.decoder.layers.11.mlp.linear_fc1.weight
+Params for bucket 139 (48250880 elements):
+	module.decoder.layers.11.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.11.self_attention.linear_qkv.weight
+	module.decoder.layers.11.self_attention.linear_proj.weight
+	module.decoder.layers.11.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.10.mlp.linear_fc2.weight
+Params for bucket 140 (58720256 elements):
+	module.decoder.layers.10.mlp.linear_fc1.weight
+Params for bucket 141 (48250880 elements):
+	module.decoder.layers.10.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.10.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.9.mlp.linear_fc2.weight
+	module.decoder.layers.10.self_attention.linear_qkv.weight
+	module.decoder.layers.10.self_attention.linear_proj.weight
+Params for bucket 142 (58720256 elements):
+	module.decoder.layers.9.mlp.linear_fc1.weight
+Params for bucket 143 (48250880 elements):
+	module.decoder.layers.9.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.9.self_attention.linear_qkv.weight
+	module.decoder.layers.9.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.9.self_attention.linear_proj.weight
+	module.decoder.layers.8.mlp.linear_fc2.weight
+Params for bucket 144 (58720256 elements):
+	module.decoder.layers.8.mlp.linear_fc1.weight
+Params for bucket 145 (48250880 elements):
+	module.decoder.layers.8.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.7.mlp.linear_fc2.weight
+	module.decoder.layers.8.self_attention.linear_qkv.weight
+	module.decoder.layers.8.self_attention.linear_proj.weight
+	module.decoder.layers.8.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 146 (58720256 elements):
+	module.decoder.layers.7.mlp.linear_fc1.weight
+Params for bucket 147 (48250880 elements):
+	module.decoder.layers.7.self_attention.linear_proj.weight
+	module.decoder.layers.7.self_attention.linear_qkv.weight
+	module.decoder.layers.7.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.7.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.6.mlp.linear_fc2.weight
+Params for bucket 148 (58720256 elements):
+	module.decoder.layers.6.mlp.linear_fc1.weight
+Params for bucket 149 (48250880 elements):
+	module.decoder.layers.6.self_attention.linear_proj.weight
+	module.decoder.layers.6.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.6.self_attention.linear_qkv.weight
+	module.decoder.layers.5.mlp.linear_fc2.weight
+	module.decoder.layers.6.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 150 (58720256 elements):
+	module.decoder.layers.5.mlp.linear_fc1.weight
+Params for bucket 151 (48250880 elements):
+	module.decoder.layers.5.self_attention.linear_qkv.weight
+	module.decoder.layers.5.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.4.mlp.linear_fc2.weight
+	module.decoder.layers.5.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.5.self_attention.linear_proj.weight
+Params for bucket 152 (58720256 elements):
+	module.decoder.layers.4.mlp.linear_fc1.weight
+Params for bucket 153 (48250880 elements):
+	module.decoder.layers.3.mlp.linear_fc2.weight
+	module.decoder.layers.4.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.4.self_attention.linear_proj.weight
+	module.decoder.layers.4.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.4.self_attention.linear_qkv.weight
+Params for bucket 154 (58720256 elements):
+	module.decoder.layers.3.mlp.linear_fc1.weight
+Params for bucket 155 (48250880 elements):
+	module.decoder.layers.3.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.3.self_attention.linear_qkv.weight
+	module.decoder.layers.2.mlp.linear_fc2.weight
+	module.decoder.layers.3.self_attention.linear_proj.weight
+	module.decoder.layers.3.self_attention.linear_qkv.layer_norm_weight
+Params for bucket 156 (58720256 elements):
+	module.decoder.layers.2.mlp.linear_fc1.weight
+Params for bucket 157 (48250880 elements):
+	module.decoder.layers.2.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.2.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.2.self_attention.linear_qkv.weight
+	module.decoder.layers.2.self_attention.linear_proj.weight
+	module.decoder.layers.1.mlp.linear_fc2.weight
+Params for bucket 158 (58720256 elements):
+	module.decoder.layers.1.mlp.linear_fc1.weight
+Params for bucket 159 (48250880 elements):
+	module.decoder.layers.1.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.1.self_attention.linear_qkv.layer_norm_weight
+	module.decoder.layers.1.self_attention.linear_proj.weight
+Params for bucket 160 (58720256 elements):
+	module.decoder.layers.0.mlp.linear_fc1.weight
+Params for bucket 161 (52445184 elements):
+	module.decoder.layers.0.mlp.linear_fc1.layer_norm_weight
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.embedding.word_embeddings.weight
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.0.self_attention.linear_qkv.layer_norm_weight
+INFO:megatron.core.optimizer:Setting up optimizer with config OptimizerConfig(optimizer='sgd', lr=0.0001, min_lr=1e-05, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, fp16=False, bf16=True, params_dtype=torch.bfloat16, loss_scale=None, initial_loss_scale=4294967296, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.999, adam_eps=1e-08, sgd_momentum=0.9, use_distributed_optimizer=True, overlap_param_gather_with_optimizer_step=False, clip_grad=1.0, log_num_zeros_in_grad=False, barrier_with_L1_time=True, timers=<megatron.core.timers.Timers object at 0x7fabfdf52760>, config_logger_dir='')
+INFO:megatron.core.optimizer_param_scheduler:> learning rate decay style: cosine
+[after model, optimizer, and learning rate scheduler are built] datetime: 2024-11-14 19:45:39 
+> building train, validation, and test datasets ...
+ > datasets target sizes (minimum size):
+    train:      10240
+    validation: -2048
+    test:       -2048
+INFO:megatron.core.datasets.blended_megatron_dataset_config:Let split_matrix = [(0, 0.969), (0.969, 0.999), (0.999, 1.0)]
+> building train, validation, and test datasets for GPT ...
+INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building dataset splits with cls=GPTDataset, sizes=(10240, -2048, -2048), and config=GPTDatasetConfig(random_seed=1234, sequence_length=4096, blend=(['/root/.cache/data/bookcorpus_text_sentence'], None), blend_per_split=[None, None, None], renormalize_blend_weights=False, split='969, 30, 1', split_matrix=[(0, 0.969), (0.969, 0.999), (0.999, 1.0)], num_dataset_builder_threads=1, path_to_cache=None, mmap_bin_files=True, mock=False, tokenizer=<megatron.training.tokenizer.tokenizer._Llama2Tokenizer object at 0x7fede98cfa30>, reset_position_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=True, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, s3_cache_path=None)
+INFO:megatron.core.datasets.indexed_dataset:Load the _IndexReader from /root/.cache/data/bookcorpus_text_sentence.idx
+INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence lengths
+INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence pointers
+INFO:megatron.core.datasets.indexed_dataset:	Extract the document indices
+INFO:megatron.core.datasets.indexed_dataset:> total number of sequences: 74157091
+INFO:megatron.core.datasets.indexed_dataset:> total number of documents: 74004228
+INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset train indices
+INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 6916ea2497c1ce4074ada1edbb43202b-GPTDataset-train-document_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 6916ea2497c1ce4074ada1edbb43202b-GPTDataset-train-sample_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 6916ea2497c1ce4074ada1edbb43202b-GPTDataset-train-shuffle_index.npy
+INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 277774
+INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset valid indices
+INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 482d9bcf177064424704eecf6edea579-GPTDataset-valid-document_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 482d9bcf177064424704eecf6edea579-GPTDataset-valid-sample_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 482d9bcf177064424704eecf6edea579-GPTDataset-valid-shuffle_index.npy
+INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 8579
+INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset test indices
+INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 742b395ae80870dbeb17d4977ca20bfd-GPTDataset-test-document_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 742b395ae80870dbeb17d4977ca20bfd-GPTDataset-test-sample_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 742b395ae80870dbeb17d4977ca20bfd-GPTDataset-test-shuffle_index.npy
+INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 281
+> finished creating GPT datasets ...
+[after dataloaders are built] datetime: 2024-11-14 19:45:39 
+done with setup ...
+training ...
+[before the start of training step] datetime: 2024-11-14 19:45:39 
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1132467 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1131854 ns
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1041452 ns
+[INFO] Select hipBLASLt algo 1 with time 1026961 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1162512 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1150015 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1152656 ns
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1156625 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1126911 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 1161865 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 14 with time 1034312 ns
+[INFO] Select hipBLASLt algo 1 with time 1035221 ns
+[INFO] Select hipBLASLt algo 14 with time 1034426 ns
+[INFO] Select hipBLASLt algo 14 with time 1034012 ns
+[INFO] Select hipBLASLt algo 14 with time 1035270 ns
+[INFO] Select hipBLASLt algo 14 with time 1043310 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 17 with time 6488495 ns
+[INFO] Select hipBLASLt algo 17 with time 6409916 ns
+[INFO] Select hipBLASLt algo 17 with time 6498936 ns
+[INFO] Select hipBLASLt algo 43 with time 6325758 ns
+[INFO] Select hipBLASLt algo 6 with time 6213298 ns
+[INFO] Select hipBLASLt algo 6 with time 6414730 ns
+[INFO] Select hipBLASLt algo 6 with time 6369457 ns
+[INFO] Select hipBLASLt algo 1 with time 6134297 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 13 with time 3145678 ns
+[INFO] Select hipBLASLt algo 13 with time 3193855 ns
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+[INFO] Select hipBLASLt algo 13 with time 3140554 ns
+[INFO] Select hipBLASLt algo 13 with time 3098881 ns
+[INFO] Select hipBLASLt algo 13 with time 3106999 ns
+[INFO] Select hipBLASLt algo 13 with time 3156484 ns
+[INFO] Select hipBLASLt algo 13 with time 3136441 ns
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+[INFO] Select hipBLASLt algo 13 with time 3154763 ns
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3183275 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3205388 ns
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3200103 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3256682 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3244727 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3221234 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3263865 ns
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 3275366 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 3324489 ns
+[INFO] Select hipBLASLt algo 11 with time 3362148 ns
+[INFO] Select hipBLASLt algo 11 with time 3343342 ns
+[INFO] Select hipBLASLt algo 11 with time 3384865 ns
+[INFO] Select hipBLASLt algo 11 with time 3405125 ns
+[INFO] Select hipBLASLt algo 11 with time 3404596 ns
+[INFO] Select hipBLASLt algo 11 with time 3416656 ns
+[INFO] Select hipBLASLt algo 8 with time 3421806 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7076396 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7114330 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7151452 ns
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7147546 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7166564 ns
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7210333 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7136461 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 27 with time 7163384 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6782571 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6807480 ns
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6687836 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6898109 ns
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6910394 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6875039 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6899147 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 6 with time 6954268 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 954399 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 967904 ns
+[INFO] Select hipBLASLt algo 1 with time 970498 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 980318 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 992757 ns
+[INFO] Select hipBLASLt algo 1 with time 989996 ns
+[INFO] Select hipBLASLt algo 1 with time 977035 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 1 with time 998253 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 4 with time 1097436 ns
+[INFO] Select hipBLASLt algo 0 with time 1098789 ns
+[INFO] Select hipBLASLt algo 0 with time 1096419 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 0 with time 1109888 ns
+[INFO] Select hipBLASLt algo 4 with time 1120328 ns
+[INFO] Select hipBLASLt algo 4 with time 1115143 ns
+[INFO] Select hipBLASLt algo 0 with time 1110079 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 0 with time 1127378 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 1429389 ns
+[INFO] Perform hipBLASLt algo selection on GPU3 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 1432399 ns
+[INFO] Perform hipBLASLt algo selection on GPU5 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 1429299 ns
+[INFO] Perform hipBLASLt algo selection on GPU7 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 1428958 ns
+[INFO] Perform hipBLASLt algo selection on GPU6 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 1442387 ns
+[INFO] Perform hipBLASLt algo selection on GPU2 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 11 with time 1455457 ns
+[INFO] Perform hipBLASLt algo selection on GPU1 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 1415613 ns
+[INFO] Perform hipBLASLt algo selection on GPU4 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 3 with time 1449184 ns
+[INFO] Perform hipBLASLt algo selection on GPU0 in range [0-49] with 10 loops 
+[INFO] Select hipBLASLt algo 36 with time 1453712 ns
+[INFO] Select hipBLASLt algo 27 with time 1483396 ns
+[INFO] Select hipBLASLt algo 23 with time 1496543 ns
+[INFO] Select hipBLASLt algo 13 with time 1502922 ns
+[INFO] Select hipBLASLt algo 23 with time 1480411 ns
+[INFO] Select hipBLASLt algo 33 with time 1500942 ns
+[INFO] Select hipBLASLt algo 13 with time 1515244 ns
+[INFO] Select hipBLASLt algo 13 with time 1508652 ns
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/tensor_parallel/layers.py:623: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+Number of parameters in transformer layers in billions:  68.45
+Number of parameters in embedding layers in billions: 0.54
+Total number of parameters in billions: 68.99
+Number of parameters in most loaded shard in billions: 8.6238
+Theoretical memory footprints: weight and optimizer=74018.83 MB
+[Rank 2] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+[Rank 4] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0[Rank 6] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+
+[Rank 0] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+[Rank 7] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0[Rank 5] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+[Rank 1] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+
+[Rank 3] (after 1 iterations) memory (MB) | allocated: 66827.22265625 | max allocated: 150672.71484375 | reserved: 161094.0 | max reserved: 161094.0
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+/root/.cache/Megatron-LM/megatron/core/optimizer/distrib_optimizer.py:557: UserWarning: `DistributedOptimizer.disable_pre_hook` will be deprecated in a future release. Use `DistributedDataParallel.disable_forward_pre_hook` directly.
+  warnings.warn(
+[after training is done] datetime: 2024-11-14 20:19:26 
+throughput per GPU: nan
+elapsed time per iteration: nan
+tokens/GPU/s: nan
+mem usages: nan

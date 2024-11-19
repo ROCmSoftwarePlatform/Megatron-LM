@@ -1,0 +1,41 @@
+W1114 18:18:12.475160 140165583917696 torch/distributed/run.py:778] 
+W1114 18:18:12.475160 140165583917696 torch/distributed/run.py:778] *****************************************
+W1114 18:18:12.475160 140165583917696 torch/distributed/run.py:778] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1114 18:18:12.475160 140165583917696 torch/distributed/run.py:778] *****************************************
+[W1114 18:18:12.822394751 socket.cpp:461] [c10d] The server socket has failed to bind to [::]:6010 (errno: 98 - Address already in use).
+[W1114 18:18:12.823239722 socket.cpp:461] [c10d] The server socket has failed to bind to 0.0.0.0:6010 (errno: 98 - Address already in use).
+[E1114 18:18:12.823247203 socket.cpp:497] [c10d] The server socket has failed to listen on any local network address.
+Traceback (most recent call last):
+  File "/opt/conda/envs/py_3.9/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.4.0.dev20240501+rocm6.1', 'console_scripts', 'torchrun')())
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 347, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/run.py", line 900, in main
+    run(args)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/run.py", line 891, in run
+    elastic_launch(
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/launcher/api.py", line 132, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/launcher/api.py", line 254, in launch_agent
+    result = agent.run()
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
+    result = f(*args, **kwargs)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/agent/server/api.py", line 873, in _invoke_run
+    self._initialize_workers(self._worker_group)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
+    result = f(*args, **kwargs)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/agent/server/api.py", line 708, in _initialize_workers
+    self._rendezvous(worker_group)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
+    result = f(*args, **kwargs)
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/agent/server/api.py", line 548, in _rendezvous
+    store, group_rank, group_world_size = spec.rdzv_handler.next_rendezvous()
+  File "/opt/conda/envs/py_3.9/lib/python3.9/site-packages/torch/distributed/elastic/rendezvous/static_tcp_rendezvous.py", line 55, in next_rendezvous
+    self._store = TCPStore(  # type: ignore[call-arg]
+torch.distributed.DistNetworkError: The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:6010 (errno: 98 - Address already in use). The server socket has failed to bind to 0.0.0.0:6010 (errno: 98 - Address already in use).
+throughput per GPU: nan
+elapsed time per iteration: nan
+tokens/GPU/s: nan
+mem usages: nan

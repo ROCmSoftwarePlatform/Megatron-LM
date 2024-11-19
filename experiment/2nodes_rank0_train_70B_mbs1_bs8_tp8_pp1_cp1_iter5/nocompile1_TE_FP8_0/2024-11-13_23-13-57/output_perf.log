@@ -1,0 +1,17 @@
+usage: torchrun [-h] [--nnodes NNODES] [--nproc-per-node NPROC_PER_NODE]
+                [--rdzv-backend RDZV_BACKEND] [--rdzv-endpoint RDZV_ENDPOINT]
+                [--rdzv-id RDZV_ID] [--rdzv-conf RDZV_CONF] [--standalone]
+                [--max-restarts MAX_RESTARTS]
+                [--monitor-interval MONITOR_INTERVAL]
+                [--start-method {spawn,fork,forkserver}] [--role ROLE] [-m]
+                [--no-python] [--run-path] [--log-dir LOG_DIR] [-r REDIRECTS]
+                [-t TEE] [--local-ranks-filter LOCAL_RANKS_FILTER]
+                [--node-rank NODE_RANK] [--master-addr MASTER_ADDR]
+                [--master-port MASTER_PORT] [--local-addr LOCAL_ADDR]
+                [--logs-specs LOGS_SPECS]
+                training_script ...
+torchrun: error: argument --master-port/--master_port: invalid int value: 'pretrain_gpt.py'
+throughput per GPU: nan
+elapsed time per iteration: nan
+tokens/GPU/s: nan
+mem usages: nan

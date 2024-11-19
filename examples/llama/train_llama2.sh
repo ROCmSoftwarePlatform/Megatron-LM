@@ -1,28 +1,5 @@
 #!/bin/bash
 ###############################################################################
-#
-# MIT License
-#
-# Copyright (c) 2024 Advanced Micro Devices, Inc.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
 #################################################################################
 # set -x
 
@@ -58,7 +35,7 @@ TIME_STAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 EXP_NAME="${EXP_NAME:-perf}"
 
 TEE_OUTPUT="${TEE_OUTPUT:-1}"
-NO_TORCH_COMPILE="${NO_TORCH_COMPILE:-1}"
+#NO_TORCH_COMPILE="${NO_TORCH_COMPILE:-1}"
 USE_FLASH_ATTN="${USE_FLASH_ATTN:-1}"
 NO_TRAINING="${NO_TRAINING:-0}" # NO_TRAINING=1: for computing metrics only
 ENABLE_PROFILING="${ENABLE_PROFILING:-0}" #enable pytorch profiling
@@ -68,12 +45,12 @@ CWD=`pwd`
 GPUS_PER_NODE=`python3 -c "import torch; print(torch.cuda.device_count())"`
 
 # single node config, Change for multinode config
-#MASTER_ADDR="${MASTER_ADDR:-localhost}"
-MASTER_ADDR="${MASTER_ADDR:-tw015}"
+MASTER_ADDR="${MASTER_ADDR:-localhost}"
+#MASTER_ADDR="${MASTER_ADDR:-tw015}"
 MASTER_PORT="${MASTER_PORT:-6008}"
-#NNODES="${NNODES:-1}"
-NNODES="${NNODES:-2}"
-NODE_RANK="${NODE_RANK:-1}"
+NNODES="${NNODES:-1}"
+#NNODES="${NNODES:-2}"
+NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
 MODEL_SIZE="${MODEL_SIZE:-70}"
@@ -86,7 +63,7 @@ SEQ_LENGTH="${SEQ_LENGTH:-4096}"
 TOTAL_ITERS="${TOTAL_ITERS:-5}"
 SEQ_PARALLEL="${SEQ_PARALLEL:-1}" 
 CONTI_PARAMS="${CONTI_PARAMS:-0}"
-OPTIMIZER="${OPTIMIZER:-sgd}"
+#OPTIMIZER="${OPTIMIZER:-sgd}"
 TE_FP8="${TE_FP8:-0}"  # 0: disable FP8, 1: enable FP8
 GEMM_TUNING="${GEMM_TUNING:-1}"
 MCORE="${MCORE:-1}"
@@ -108,7 +85,7 @@ fi
 
 MAX_POSITION_EMBEDDINGS=128000
 
-DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/nocompile${NO_TORCH_COMPILE}_TE_FP8_${TE_FP8}/${TIME_STAMP}"
+DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
 TRAIN_LOG="${LOG_DIR}/output_${EXP_NAME}.log"
 mkdir -p $LOG_DIR
@@ -185,9 +162,9 @@ TRAIN_ARGS="--lr 1e-4 \
         --lr-decay-style cosine \
         --weight-decay 1.0e-1 \
         --clip-grad 1.0 \
-        --optimizer sgd \
+        --optimizer adam \
 "
-
+# --optimizer sgd \
 DATA_ARGS="
     --tokenizer-type Llama2Tokenizer  \
     --tokenizer-model ${TOKENIZER_MODEL} \
