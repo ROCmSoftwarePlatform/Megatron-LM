@@ -35,10 +35,11 @@ TIME_STAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 EXP_NAME="${EXP_NAME:-perf}"
 
 TEE_OUTPUT="${TEE_OUTPUT:-1}"
-#NO_TORCH_COMPILE="${NO_TORCH_COMPILE:-1}"
 USE_FLASH_ATTN="${USE_FLASH_ATTN:-1}"
 NO_TRAINING="${NO_TRAINING:-0}" # NO_TRAINING=1: for computing metrics only
 ENABLE_PROFILING="${ENABLE_PROFILING:-0}" #enable pytorch profiling
+ENABLE_ROPE="${ENABLE_ROPE:-1}"
+DISABLE_ROPE_TE="${DISABLE_ROPE_TE:-0}"
 echo "NO_TRAINING=$NO_TRAINING"
 
 CWD=`pwd`
@@ -61,24 +62,24 @@ SEQ_LENGTH="${SEQ_LENGTH:-2048}"
 TOTAL_ITERS="${TOTAL_ITERS:-10}"
 SEQ_PARALLEL="${SEQ_PARALLEL:-1}" 
 CONTI_PARAMS="${CONTI_PARAMS:-0}"
-#OPTIMIZER="${OPTIMIZER:-sgd}"
 TE_FP8="${TE_FP8:-0}"  # 0: disable FP8, 1: enable FP8
 GEMM_TUNING="${GEMM_TUNING:-1}"
 MCORE="${MCORE:-1}"
 
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
-CHECKPOINT_PATH=$EXPERIMENT_DIR/ckpts
+CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
 
 DATA_DIR="/root/.cache/data"  # change to where the dataset is stored
+
 TOKENIZER_MODEL=meta-llama/Llama-3.1-8B
 # Download the tokenizer model
 # if ! [ -f "$TOKENIZER_MODEL" ]; then
 # wget -O $TOKENIZER_MODEL https://huggingface.co/meta-llama/Llama-3.1-8B/blob/main/original/tokenizer.model
 # fi
 
-DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence
+DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
 MAX_POSITION_EMBEDDINGS=128000
 
@@ -161,7 +162,6 @@ TRAIN_ARGS="--lr 1e-4 \
         --clip-grad 1.0 \
         --optimizer adam \
 "
-#--optimizer sgd \
 
 DATA_ARGS="
     --tokenizer-type HuggingFaceTokenizer \
@@ -175,7 +175,6 @@ DATA_ARGS="
     --num-workers $ds_works \
     --data-path $DATA_PATH \
 "
-# --tokenizer-type Llama2Tokenizer \
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \
@@ -228,6 +227,14 @@ fi
 
 if [ "$MCORE" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --use-mcore-models"
+fi
+
+if [ "$ENABLE_ROPE" -eq 1 ]; then
+EXTRA_ARGS="$EXTRA_ARGS --position-embedding-type rope"
+fi
+
+if [ "$DISABLE_ROPE_TE" -eq 1 ]; then
+EXTRA_ARGS="$EXTRA_ARGS --disable-te-fused-rope"
 fi
 
 if [ "$TE_FP8" -eq 1 ]; then
