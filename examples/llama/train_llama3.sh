@@ -173,8 +173,9 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --data-path $DATA_PATH \
+    --mock-data
 "
+#--data-path $DATA_PATH \
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \

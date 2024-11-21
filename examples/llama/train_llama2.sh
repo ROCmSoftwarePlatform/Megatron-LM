@@ -35,7 +35,6 @@ TIME_STAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 EXP_NAME="${EXP_NAME:-perf}"
 
 TEE_OUTPUT="${TEE_OUTPUT:-1}"
-#NO_TORCH_COMPILE="${NO_TORCH_COMPILE:-1}"
 USE_FLASH_ATTN="${USE_FLASH_ATTN:-1}"
 NO_TRAINING="${NO_TRAINING:-0}" # NO_TRAINING=1: for computing metrics only
 ENABLE_PROFILING="${ENABLE_PROFILING:-0}" #enable pytorch profiling
@@ -175,9 +174,9 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --data-path $DATA_PATH \
+    --mock-data
 "
-
+#    --data-path $DATA_PATH \
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \
