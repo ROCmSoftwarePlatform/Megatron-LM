@@ -1,5 +1,8 @@
 #!/bin/bash
 ###############################################################################
+# Copyright (c) 2024, Advanced Micro Devices, Inc. All rights reserved.
+#
+# See LICENSE for license information.
 #################################################################################
 # set -x
 
