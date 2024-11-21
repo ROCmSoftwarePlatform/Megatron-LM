@@ -302,20 +302,4 @@ TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
 
-echo '============================================================================================================'
-grep -Eo 'mem usages: [^|]*' $TRAIN_LOG | sed -E 's/.*mem usages: ([0-9\.]+).*/\1/' > tmp.txt
-MEMUSAGE=$(python3 mean_log_value.py tmp.txt)
-echo "mem usages: $MEMUSAGE" |& tee -a $TRAIN_LOG
-rm tmp.txt
 
-
-
-NUM_GROUPS=$(( ${NNODES} - 1 ))
-if [[ $NODE_RANK -eq $NUM_GROUPS ]]; then
-    'EXP_NAME	#Nodes	Model_SIZE 	Seq_Len	MBS	GBS	TP	PP	CP	Tokens/Sec/GPU	TFLOPs/s/GPU	Memory Usage	Time/iter'
-    echo "${EXP_NAME}	$NNODES	$MODEL_SIZE	$SEQ_LENGTH	$MBS	$BS	$TP	$PP	$CP	$TGS	$PERFORMANCE	$MEMUSAGE	$ETPI" |& tee -a ../out.csv
-    echo "${EXP_NAME}	$NNODES	$MODEL_SIZE	$SEQ_LENGTH	$MBS	$BS	$TP	$PP	$CP	$TGS	$PERFORMANCE	$MEMUSAGE	$ETPI" |& tee -a out.csv
-else
-        echo "Not the final node; check another the output for another node!"
-        exit 1
-fi

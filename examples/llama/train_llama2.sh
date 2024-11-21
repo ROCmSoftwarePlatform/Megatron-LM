@@ -48,7 +48,7 @@ GPUS_PER_NODE=`python3 -c "import torch; print(torch.cuda.device_count())"`
 # single node config, Change for multinode config
 MASTER_ADDR="${MASTER_ADDR:-localhost}"
 #MASTER_ADDR="${MASTER_ADDR:-tw015}"
-MASTER_PORT="${MASTER_PORT:-6008}"
+MASTER_PORT="${MASTER_PORT:-6020}"
 NNODES="${NNODES:-1}"
 #NNODES="${NNODES:-2}"
 NODE_RANK="${NODE_RANK:-0}"
@@ -302,21 +302,3 @@ TIME_PER_ITER=$(python3 mean_log_value.py tmp.txt 2>/dev/null | awk '{printf "%.
 TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", bs * sl * 1000/ (tpi * ws)}')
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
-
-echo '============================================================================================================'
-grep -Eo 'mem usages: [^|]*' $TRAIN_LOG | sed -E 's/.*mem usages: ([0-9\.]+).*/\1/' > tmp.txt
-MEMUSAGE=$(python3 mean_log_value.py tmp.txt)
-echo "mem usages: $MEMUSAGE" |& tee -a $TRAIN_LOG
-rm tmp.txt
-
-
-
-NUM_GROUPS=$(( ${NNODES} - 1 ))
-if [[ $NODE_RANK -eq $NUM_GROUPS ]]; then
-    'EXP_NAME	#Nodes	Model_SIZE 	Seq_Len	MBS	GBS	TP	PP	CP	Tokens/Sec/GPU	TFLOPs/s/GPU	Memory Usage	Time/iter'
-    echo "${EXP_NAME}	$NNODES	$MODEL_SIZE	$SEQ_LENGTH	$MBS	$BS	$TP	$PP	$CP	$TGS	$PERFORMANCE	$MEMUSAGE	$ETPI" |& tee -a ../out.csv
-    echo "${EXP_NAME}	$NNODES	$MODEL_SIZE	$SEQ_LENGTH	$MBS	$BS	$TP	$PP	$CP	$TGS	$PERFORMANCE	$MEMUSAGE	$ETPI" |& tee -a out.csv
-else
-        echo "Not the final node; check another the output for another node!"
-        exit 1
-fi
