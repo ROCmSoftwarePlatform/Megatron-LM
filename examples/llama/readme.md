@@ -1,7 +1,3 @@
-Here is the reformatted README file for Llama2/Llama3 model pretraining instructions:
-
----
-
 # Llama2/Llama3 Model Pretraining Instructions
 
 This guide provides the steps for setting up the environment and configuring the script to train Llama2 or Llama3 models.
@@ -16,15 +12,37 @@ This guide provides the steps for setting up the environment and configuring the
 
 2. **Launch Docker Container**  
    Start the Docker container:  
-   `docker run -it --gpus all --rm <image_name>`
+   `docker run -it <additional flags> <image_name>`
 
 ---
 
-## 2. Configurations in Script (`Megatron/examples/llama`)
+## 2. How to Run
 
-### 2.1 Network Interface
+### 2.1 Single Node Training
+To run the training on a single node, go to Megatron-LM folder, use the following command:
+```bash
+TEE_OUTPUT=1 MBS=5 BS=120 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+```
+
+
+### 2.2 Multi-node Training
+To run training on multiple nodes, launch the Docker container on each node. Follow these steps:
+
+- **On the Master Node:**
+  ```bash
+  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+  ```
+
+- **On the Slave Node(s):**
+  ```bash
+  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+  ```
+
+## 3. Configurations in Script (`Megatron/examples/llama`)
+
+### 3.1 Network Interface
 Update the network interface in the script to match your system’s network interface.  
-To find your network interface, run:  
+To find your network interface, run (out of container):  
 ```bash
 ip a
 ```
@@ -34,13 +52,13 @@ export NCCL_SOCKET_IFNAME=ens50f0np0
 export GLOO_SOCKET_IFNAME=ens50f0np0
 ```
 
-### 2.2 Dataset
+### 3.2 Dataset
 You can use either mock data or real data for training.
 
 - **Mock Data:**  
-  Replace the data path as follows:
+  Replace the data path:
   ```bash
-  --data-path $DATA_PATH \ 
+  --data-path $DATA_PATH \ with 
   --mock-data
   ```
 
@@ -51,7 +69,7 @@ You can use either mock data or real data for training.
   DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence
   ```
 
-### 2.3 Tokenizer
+### 3.3 Tokenizer
 
 - **For Llama2 Training:**  
   Use the `Llama2Tokenizer`.
@@ -62,7 +80,7 @@ You can use either mock data or real data for training.
   TOKENIZER_MODEL=meta-llama/Llama-3.1-8B  # For Llama3
   ```
 
-### 2.4 Multi-node Training
+### 3.4 Multi-node Training
 If you're running multi-node training, update the following environment variables:
 
 - **Master Address:**  
@@ -82,39 +100,6 @@ If you're running multi-node training, update the following environment variable
   ```bash
   NODE_RANK="${NODE_RANK:-0}"
   ```
-
----
-
-## 3. How to Run
-
-### 3.1 Single Node Training
-To run the training on a single node, use the following command:
-```bash
-TEE_OUTPUT=1 MBS=5 BS=120 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash train_llama2.sh
-```
-Sample output:
-![alt text](image.png)
-
-### 3.2 Multi-node Training
-To run training on multiple nodes, launch the Docker container on each node. Follow these steps:
-
-- **On the Master Node:**
-  ```bash
-  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash train_llama2.sh
-  ```
-
-- **On the Slave Node(s):**
-  ```bash
-  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 NO_TORCH_COMPILE=1 SEQ_LENGTH=4096 bash train_llama2.sh
-  ```
-
-Sample output for 2-node training:
-
-- **Master Node:**
-  ![alt text](image-1.png)
-
-- **Slave Node:**
-  ![alt text](image-3.png)
 
 ---
 
