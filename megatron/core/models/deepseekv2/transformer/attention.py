@@ -12,6 +12,8 @@ from megatron.core.transformer.attention import Attention, SelfAttention, SelfAt
 
 from megatron.core.models.deepseekv2.yarn_rotary_pos_embedding import DeepseekV2YarnRotaryEmbedding, \
     apply_rotary_pos_emb, yarn_get_mscale
+
+
 class DeepSeekv2Attention(Attention, ABC):
     """Attention layer abstract  class modified for Deepseekv2.
 
@@ -103,7 +105,7 @@ class DeepSeekv2Attention(Attention, ABC):
 
         return output, bias
     
-class DeepSeekv2SelfAttention(SelfAttention):
+class DeepSeekv2SelfAttention(SelfAttention, DeepSeekv2Attention):
     """Self-attention layer class modified for Deepseekv2
 
     Self-attention layer takes input with size [s, b, h]

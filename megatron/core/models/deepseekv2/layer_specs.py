@@ -19,6 +19,7 @@ from megatron.core.transformer.spec_utils import ModuleSpec
 from megatron.core.transformer.transformer_layer import TransformerLayerSubmodules
 
 from megatron.core.models.deepseekv2.transformer_layer import DeekSeekv2TransformerLayer
+from megatron.core.models.deepseekv2.transformer.attention import DeepSeekv2Attention, DeepSeekv2SelfAttention
 
 try:
     from megatron.core.extensions.transformer_engine import (
@@ -82,7 +83,7 @@ def get_gpt_layer_with_transformer_engine_spec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
-                    module=SelfAttention,
+                    module=DeepSeekv2SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_q_proj=TEColumnParallelLinear,
@@ -109,7 +110,7 @@ def get_gpt_layer_with_transformer_engine_spec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
-                    module=SelfAttention,
+                    module=DeepSeekv2SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_qkv=TELayerNormColumnParallelLinear,
@@ -159,7 +160,7 @@ def get_gpt_layer_local_spec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
-                    module=SelfAttention,
+                    module=DeepSeekv2SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_q_proj=ColumnParallelLinear,
@@ -186,7 +187,7 @@ def get_gpt_layer_local_spec(
             submodules=TransformerLayerSubmodules(
                 input_layernorm=LNImpl,
                 self_attention=ModuleSpec(
-                    module=SelfAttention,
+                    module=DeepSeekv2SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_qkv=ColumnParallelLinear,
