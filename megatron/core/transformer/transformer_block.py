@@ -185,6 +185,7 @@ class TransformerBlock(MegatronModule):
         self.post_layer_norm = post_layer_norm
         self.pre_process = pre_process
         self.post_process = post_process
+        self.world_size = parallel_state.get_tensor_model_parallel_world_size()
         # Dictionary to store CUDA graphs. Number of items in the dictionary = len(self.layers).
         # Item `i` in the dictionary is a list of `N` CUDA graphs for layer 'i' where N is the
         # number of microbatches. Multiple CUDA graphs per layer is required to support

@@ -52,6 +52,7 @@ class MLP(MegatronModule):
         submodules: MLPSubmodules,
         is_expert: bool = False,
         input_size: int = None,
+        is_shared_expert: bool = False,
     ):
         super().__init__(config=config)
 
@@ -60,7 +61,27 @@ class MLP(MegatronModule):
         self.input_size = input_size if input_size != None else self.config.hidden_size
 
         # If this is a gated linear unit we double the output width, see https://arxiv.org/pdf/2002.05202.pdf
-        ffn_hidden_size = self.config.ffn_hidden_size
+        if is_expert is True:
+            ffn_hidden_size = self.config.moe_ffn_hidden_size
+        else:
+            if not is_shared_expert:
+                ffn_hidden_size = self.config.ffn_hidden_size
+            else:
+                ffn_hidden_size = self.config.moe_ffn_hidden_size * self.config.num_shared_experts
+
+        self.linear_fc2 = build_module(
+            submodules.linear_fc2,
+            ffn_hidden_size,
+            self.config.hidden_size,
+            config=self.config,
+            init_method=self.config.output_layer_init_method,
+            bias=self.config.add_bias_linear,
+            input_is_parallel=True,
+            skip_bias_add=True,
+            is_expert=is_expert,
+            tp_comm_buffer_name='fc2',
+        )
+
         if self.config.gated_linear_unit:
             ffn_hidden_size *= 2
 
@@ -79,18 +100,6 @@ class MLP(MegatronModule):
 
         self.activation_func = self.config.activation_func
 
-        self.linear_fc2 = build_module(
-            submodules.linear_fc2,
-            self.config.ffn_hidden_size,
-            self.config.hidden_size,
-            config=self.config,
-            init_method=self.config.output_layer_init_method,
-            bias=self.config.add_bias_linear,
-            input_is_parallel=True,
-            skip_bias_add=True,
-            is_expert=is_expert,
-            tp_comm_buffer_name='fc2',
-        )
 
     def forward(self, hidden_states):
 
