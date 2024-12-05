@@ -29,7 +29,10 @@ class DeekSeekv2TransformerLayer(TransformerLayer):
         layer_number: int = 1,
         hidden_dropout: float = None,
     ):
-        super().__init__(config=config)
+        super().__init__(config=config,
+                         submodules=submodules,
+                         layer_number=layer_number,
+                         hidden_dropout=hidden_dropout)
         self.world_size = parallel_state.get_tensor_model_parallel_world_size()
     
     def forward(

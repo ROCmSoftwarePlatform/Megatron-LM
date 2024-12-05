@@ -35,7 +35,7 @@ try:
 except ImportError:
     HAVE_TE = False
 
-from megatron.legacy.model.rms_norm import RMSNorm
+from megatron.core.models.deepseekv2.layer_specs import DeepseekV2RMSNorm
 try:
     import apex  # pylint: disable=unused-import
 
@@ -169,13 +169,13 @@ def get_gpt_layer_local_spec(
                         linear_kv_up_proj=ColumnParallelLinear,
                         core_attention=DotProductAttention,
                         linear_proj=RowParallelLinear,
-                        q_layernorm=RMSNorm if qk_layernorm else IdentityOp,
-                        kv_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                        q_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
+                        kv_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
                     ),
                 ),
                 self_attn_bda=get_bias_dropout_add,
-                pre_mlp_layernorm=RMSNorm if num_experts else IdentityOp,
-                input_layernorm=RMSNorm if num_experts else IdentityOp,
+                pre_mlp_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
+                input_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
                 mlp=mlp,
                 mlp_bda=get_bias_dropout_add,
             ),
@@ -192,8 +192,8 @@ def get_gpt_layer_local_spec(
                         linear_qkv=ColumnParallelLinear,
                         core_attention=DotProductAttention,
                         linear_proj=RowParallelLinear,
-                        q_layernorm=RMSNorm if qk_layernorm else IdentityOp,
-                        k_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                        q_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
+                        k_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
                     ),
                 ),
                 self_attn_bda=get_bias_dropout_add,
