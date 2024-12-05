@@ -53,7 +53,7 @@ def model_provider(
         #     args.num_experts, args.moe_grouped_gemm, args.qk_layernorm
         # )
         transformer_layer_spec = get_gpt_layer_local_spec(args.num_experts, args.moe_grouped_gemm, 
-                                                          qk_layernorm=True, multi_latent_attention=True)
+                                                          qk_layernorm=True)
         model = GPTModel(
             config=config,
             transformer_layer_spec=transformer_layer_spec,

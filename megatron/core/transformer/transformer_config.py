@@ -597,3 +597,6 @@ class DeepSeekV2TransformerConfig(TransformerConfig):
     max_position_embeddings: int = None
 
     moe_aux_loss_coeff: float = 0.0
+
+    qk_head_dim: int = 128
+    """Dimension of the head in the QK projection. q_head_dim = qk_head_dim + qk_pos_emb_head_dim"""

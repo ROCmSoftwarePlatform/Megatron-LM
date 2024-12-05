@@ -35,7 +35,7 @@ try:
 except ImportError:
     HAVE_TE = False
 
-from megatron.core.models.deepseekv2.layer_specs import DeepseekV2RMSNorm
+from megatron.core.models.deepseekv2.rms_norm import DeepseekV2RMSNorm
 try:
     import apex  # pylint: disable=unused-import
 
@@ -82,9 +82,9 @@ def get_gpt_layer_with_transformer_engine_spec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
-                    module=MLASelfAttention,
+                    module=SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
-                    submodules=MLASelfAttentionSubmodules(
+                    submodules=SelfAttentionSubmodules(
                         linear_q_proj=TEColumnParallelLinear,
                         linear_q_down_proj=TEColumnParallelLinear,
                         linear_q_up_proj=TEColumnParallelLinear,
@@ -159,12 +159,12 @@ def get_gpt_layer_local_spec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
-                    module=MLASelfAttention,
+                    module=SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
-                    submodules=MLASelfAttentionSubmodules(
+                    submodules=SelfAttentionSubmodules(
                         linear_q_proj=ColumnParallelLinear,
-                        linear_q_down_proj=ColumnParallelLinear,
-                        linear_q_up_proj=ColumnParallelLinear,
+                        linear_q_a_proj=ColumnParallelLinear,
+                        linear_q_b_proj=ColumnParallelLinear,
                         linear_kv_down_proj=ColumnParallelLinear,
                         linear_kv_up_proj=ColumnParallelLinear,
                         core_attention=DotProductAttention,
