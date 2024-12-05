@@ -37,20 +37,6 @@ except ImportError:
     HAVE_TE = False
 
 from megatron.core.models.deepseekv2.rms_norm import DeepseekV2RMSNorm
-try:
-    import apex  # pylint: disable=unused-import
-
-    from megatron.core.fusions.fused_layer_norm import FusedLayerNorm
-
-    HAVE_APEX = True
-    LNImpl = FusedLayerNorm
-except ImportError:
-    import warnings
-
-    from megatron.core.transformer.torch_layer_norm import WrappedTorchLayerNorm
-
-    warnings.warn('Apex is not installed. Falling back to Torch LayerNorm')
-    LNImpl = WrappedTorchLayerNorm
 
 
 def get_gpt_layer_with_transformer_engine_spec(
@@ -118,8 +104,8 @@ def get_gpt_layer_with_transformer_engine_spec(
                         linear_proj=TERowParallelLinear,
                         # TENorm significantly harms convergence when used
                         # for QKLayerNorm; we instead use the Apex implementation.
-                        q_layernorm=FusedLayerNorm if qk_layernorm else IdentityOp,
-                        k_layernorm=FusedLayerNorm if qk_layernorm else IdentityOp,
+                        q_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
+                        k_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
                     ),
                 ),
                 self_attn_bda=get_bias_dropout_add,
@@ -178,6 +164,7 @@ def get_gpt_layer_local_spec(
                 pre_mlp_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
                 input_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
                 mlp=mlp,
+                mlp_dense=mlp_dense,
                 mlp_bda=get_bias_dropout_add,
             ),
         )
@@ -185,7 +172,6 @@ def get_gpt_layer_local_spec(
         return ModuleSpec(
             module=DeekSeekv2TransformerLayer,
             submodules=TransformerLayerSubmodules(
-                input_layernorm=LNImpl,
                 self_attention=ModuleSpec(
                     module=DeepSeekv2SelfAttention,
                     params={"attn_mask_type": AttnMaskType.causal},
@@ -198,7 +184,8 @@ def get_gpt_layer_local_spec(
                     ),
                 ),
                 self_attn_bda=get_bias_dropout_add,
-                pre_mlp_layernorm=LNImpl,
+                pre_mlp_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
+                input_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
                 mlp=mlp,
                 mlp_bda=get_bias_dropout_add,
                 sharded_state_dict_keys_map={
