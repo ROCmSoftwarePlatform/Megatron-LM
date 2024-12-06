@@ -8,7 +8,7 @@ from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.utils import divide
 from megatron.core.transformer.enums import AttnMaskType
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.transformer.attention import Attention, SelfAttention, SelfAttentionSubmodules
+from megatron.core.transformer.attention import Attention, SelfAttention, DeepSeekv2SelfAttentionSubmodules
 
 from megatron.core.models.deepseekv2.yarn_rotary_pos_embedding import DeepseekV2YarnRotaryEmbedding, \
     apply_rotary_pos_emb, yarn_get_mscale
@@ -48,7 +48,88 @@ class DeepSeekv2Attention(Attention, ABC):
             base=self.config.rotary_base,
             **kwargs,
         )
+        
+    def get_query_key_value_tensors(self, hidden_states, key_value_states=None, position_ids=None):
+        """
+        Derives `query`, `key` and `value` tensors from `hidden_states`.
+        """
+        if self.config.q_lora_rank is not None:
+            q, _ = self.linear_q_a_proj(hidden_states)
+            q = self.q_a_layernorm(q)
+            q, _ = self.linear_q_b_proj(q)
+        else:
+            # hidden_states:[48, 1, 2048] q: [96, 1, 1536]
+            q, _ = self.linear_q_proj(hidden_states)
 
+        q_len, bsz, _ = q.size()
+        # [96, 1, 8, 192]
+        q = q.view(q_len, bsz, self.num_attention_heads_per_partition, self.q_head_dim)
+
+        # q_nope: [96, 1, 8, 128], q_pe: [96, 1, 8, 64]
+        q_nope, q_pe = torch.split(
+            q, [self.config.qk_nope_head_dim, self.config.qk_rope_head_dim], dim=-1
+        )
+
+        # [96, 1, 576])
+        compressed_kv, _ = self.linear_kv_a_proj_with_mqa(hidden_states)
+
+        #compressed_kv:[96, 1, 512], k_pe: [96, 1, 64]
+        compressed_kv, k_pe = torch.split(
+            compressed_kv, [self.config.kv_lora_rank,
+                            self.config.qk_rope_head_dim], dim=-1
+        )
+
+        #[96, 1, 2048]
+        kv, _ = self.linear_kv_b_proj(self.kv_a_layernorm(compressed_kv))
+
+        #[96, 1, 8, 128])
+        kv = kv.view(q_len, bsz, self.num_attention_heads_per_partition, self.config.qk_nope_head_dim + self.config.v_head_dim)
+
+        #k_nope: [96, 1, 8, 128], value_states: [96, 1, 8, 128]
+        k_nope, value_states = torch.split(
+            kv, [self.config.qk_nope_head_dim, self.config.v_head_dim], dim=-1
+        )
+
+        # [96, 1, 8, 128] -> [1, 8, 96, 128]
+        #value_states = value_states.transpose(0, 1).transpose(1, 2)
+        kv_seq_len = value_states.shape[0]
+
+        #cos: [96, 64], sin:[96, 64]
+        cos, sin = self.rotary_pos_emb(value_states, seq_len=kv_seq_len)
+
+        #[96, 1, 8, 64] -> [1, 8, 96, 64]
+        q_pe = q_pe.transpose(0, 1).transpose(1, 2)
+        #[96, 1, 32] -> [1, 96, 32]
+        k_pe = k_pe.transpose(0, 1)
+        #[1, 1, 96, 64]
+        k_pe = k_pe.reshape(bsz, q_len, 1, -1).transpose(1, 2)
+
+        #q_pe: [1, 8, 96, 64], k_pe:[1, 1, 96, 64]
+        q_pe, k_pe = apply_rotary_pos_emb(q_pe, k_pe, cos, sin, position_ids)
+
+        #[1, 8, 96, 192]
+        query_states = q_pe.new_empty(bsz, self.num_attention_heads_per_partition, q_len, self.q_head_dim)
+
+        #[96, 1, 8, 128] -> [1, 8, 96, 128]
+        q_nope = q_nope.transpose(0, 1).transpose(1, 2)
+
+        query_states[:, :, :, : self.config.qk_nope_head_dim] = q_nope
+        query_states[:, :, :, self.config.qk_nope_head_dim :] = q_pe
+
+        #[1, 8, 96, 192]
+        key_states = k_pe.new_empty(bsz, self.num_attention_heads_per_partition, q_len, self.q_head_dim)
+
+        # [96, 1, 8, 128] -> [1, 8, 96, 128]
+        k_nope = k_nope.transpose(0, 1).transpose(1, 2)
+
+        key_states[:, :, :, : self.config.qk_nope_head_dim] = k_nope
+        key_states[:, :, :, self.config.qk_nope_head_dim :] = k_pe
+
+        query_states = query_states.transpose(1, 2).transpose(0, 1)
+        key_states = key_states.transpose(1, 2).transpose(0, 1)
+
+        return query_states, key_states, value_states
+    
     def forward(
         self,
         hidden_states,
@@ -109,20 +190,21 @@ class DeepSeekv2Attention(Attention, ABC):
 
         return output, bias
     
-class DeepSeekv2SelfAttention(SelfAttention, DeepSeekv2Attention):
+class DeepSeekv2SelfAttention(DeepSeekv2Attention):
     """Self-attention layer class modified for Deepseekv2
 
     Self-attention layer takes input with size [s, b, h]
     and returns output of the same size.
     """
     def __init__(self,config: TransformerConfig,
-                 submodules: SelfAttentionSubmodules,
+                 submodules: DeepSeekv2SelfAttentionSubmodules,
                  layer_number: int,
                  attn_mask_type=AttnMaskType.padding,):
         super().__init__(config=config,
                          submodules=submodules,
                          layer_number=layer_number,
-                         attn_mask_type=attn_mask_type)
+                         attn_mask_type=attn_mask_type,
+                         attention_type="self",)
 
         if self.config.q_lora_rank is None:
 
