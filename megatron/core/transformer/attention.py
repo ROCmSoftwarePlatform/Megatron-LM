@@ -48,7 +48,18 @@ class SelfAttentionSubmodules:
     q_a_layernorm: Union[ModuleSpec, type] = None
     kv_a_layernorm: Union[ModuleSpec, type] = None
     
-    
+@dataclass
+class DeepSeekv2SelfAttentionSubmodules:
+    linear_q_proj: Union[ModuleSpec, type] = None
+    linear_q_a_proj: Union[ModuleSpec, type] = None
+    linear_q_b_proj: Union[ModuleSpec, type] = None
+    linear_kv_a_proj_with_mqa: Union[ModuleSpec, type] = None
+    linear_kv_b_proj: Union[ModuleSpec, type] = None
+    core_attention: Union[ModuleSpec, type] = None
+    linear_proj: Union[ModuleSpec, type] = None
+    q_a_layernorm: Union[ModuleSpec, type] = None
+    kv_a_layernorm: Union[ModuleSpec, type] = None
+
 @dataclass
 class CrossAttentionSubmodules:
     linear_q: Union[ModuleSpec, type] = None

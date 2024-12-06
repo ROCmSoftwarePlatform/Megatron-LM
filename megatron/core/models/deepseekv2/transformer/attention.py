@@ -32,7 +32,7 @@ class DeepSeekv2Attention(Attention, ABC):
         super().__init__(config=config,submodules=submodules,layer_number=layer_number,attn_mask_type=attn_mask_type,attention_type=attention_type)
         
         self.num_heads = self.config.num_attention_heads
-
+        self.q_head_dim = self.config.qk_nope_head_dim + self.config.qk_rope_head_dim
         kwargs = {
             "original_max_position_embeddings": 4096,
             "beta_fast": 32,
