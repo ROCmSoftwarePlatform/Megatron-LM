@@ -23,9 +23,13 @@ class DeepSeekv2Attention(Attention, ABC):
 
     def __init__(
         self,
-        config: TransformerConfig
+        config: TransformerConfig,
+        submodules,
+        layer_number: int,
+        attn_mask_type: AttnMaskType,
+        attention_type: str,
     ):
-        super().__init__(config=config)
+        super().__init__(config=config,submodules=submodules,layer_number=layer_number,attn_mask_type=attn_mask_type,attention_type=attention_type)
         
         self.num_heads = self.config.num_attention_heads
 
@@ -112,9 +116,13 @@ class DeepSeekv2SelfAttention(SelfAttention, DeepSeekv2Attention):
     and returns output of the same size.
     """
     def __init__(self,config: TransformerConfig,
-                 submodules: SelfAttentionSubmodules,):
+                 submodules: SelfAttentionSubmodules,
+                 layer_number: int,
+                 attn_mask_type=AttnMaskType.padding,):
         super().__init__(config=config,
-                         submodules=submodules,)
+                         submodules=submodules,
+                         layer_number=layer_number,
+                         attn_mask_type=attn_mask_type)
 
         if self.config.q_lora_rank is None:
 

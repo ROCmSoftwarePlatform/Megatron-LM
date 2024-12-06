@@ -147,7 +147,7 @@ def get_gpt_layer_local_spec(
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
                     module=DeepSeekv2SelfAttention,
-                    params={"attn_mask_type": AttnMaskType.causal},
+                    #params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_q_proj=ColumnParallelLinear,
                         linear_q_a_proj=ColumnParallelLinear,
@@ -174,7 +174,7 @@ def get_gpt_layer_local_spec(
             submodules=TransformerLayerSubmodules(
                 self_attention=ModuleSpec(
                     module=DeepSeekv2SelfAttention,
-                    params={"attn_mask_type": AttnMaskType.causal},
+                    #params={"attn_mask_type": AttnMaskType.causal},
                     submodules=SelfAttentionSubmodules(
                         linear_qkv=ColumnParallelLinear,
                         core_attention=DotProductAttention,
