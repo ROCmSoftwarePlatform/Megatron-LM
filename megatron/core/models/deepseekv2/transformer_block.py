@@ -23,8 +23,8 @@ from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.transformer.utils import sharded_state_dict_default
 from megatron.core.utils import make_sharded_tensor_for_checkpoint, make_viewless_tensor
 
-from .transformer_config import TransformerConfig
-from .transformer_layer import BaseTransformerLayer
+from megatron.core.transformer.transformer_config import TransformerConfig
+from megatron.core.transformer.transformer_layer import BaseTransformerLayer
 from .rms_norm import DeepseekV2RMSNorm
 
 def get_num_layers_to_build(config: TransformerConfig) -> int:

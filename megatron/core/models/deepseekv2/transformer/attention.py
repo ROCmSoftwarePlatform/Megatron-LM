@@ -135,6 +135,8 @@ class DeepSeekv2Attention(Attention, ABC):
         hidden_states,
         attention_mask,
         key_value_states=None,
+        inference_params=None,
+        rotary_pos_emb=None,
         packed_seq_params=None,
         position_ids=None
     ):
