@@ -17,6 +17,8 @@ class TransformerConfig(ModelParallelConfig):
     including those in ModelParallelConfig.
     """
 
+    moe_ffn_hidden_size: int = None
+    
     ####################
     # model architecture
     ####################
@@ -567,8 +569,6 @@ class MLATransformerConfig(TransformerConfig):
 
     mscale_all_dim: float = 0.707
     """Mscale all dimensions for YaRN RoPE in Multi-Latent Attention."""
-
-    moe_ffn_hidden_size: int = None
 
 
 @dataclass
