@@ -13,8 +13,6 @@ export NCCL_CHECKS_DISABLE=1
 export NCCL_IB_HCA=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7 
 export NCCL_IB_GID_INDEX=3
 export NCCL_CROSS_NIC=0
-#export NCCL_SOCKET_IFNAME=ens50f0np0 # network interface  
-#export GLOO_SOCKET_IFNAME=ens50f0np0 # network interface
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_PROTO=Simple
 export RCCL_MSCCL_ENABLE=0
@@ -78,7 +76,6 @@ mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
 
-#DATA_DIR="/root/.cache/data"  # change to where the dataset is stored
 DATA_DIR="${DATA_DIR:-/root/.cache/data}"
 DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
