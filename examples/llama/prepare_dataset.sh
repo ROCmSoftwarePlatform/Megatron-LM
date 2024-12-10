@@ -41,8 +41,8 @@ if ! [ -f "$TOKENIZER_MODEL" ]; then
 fi
 
 python3 prepare_bookcorpus_megatron_dataset.py --out-dir ${DATA_PATH}
-python3 tools/preprocess_data.py --input ${DATA_PATH}/bookcorpus_megatron.json  --tokenizer-type GPTSentencePieceTokenizer \
+python3 ../../tools/preprocess_data.py --input ${DATA_PATH}/bookcorpus_megatron.json  --tokenizer-type GPTSentencePieceTokenizer \
 --tokenizer-model ${TOKENIZER_MODEL} --output-prefix ${DATA_PATH}/bookcorpus --workers `nproc` --split-sentences
 
-python3 tools/preprocess_data.py --input ${DATA_PATH}/bookcorpus_megatron.json  --tokenizer-type GPTSentencePieceTokenizer \
+python3 ../../tools/preprocess_data.py --input ${DATA_PATH}/bookcorpus_megatron.json  --tokenizer-type GPTSentencePieceTokenizer \
 --tokenizer-model ${TOKENIZER_MODEL} --output-prefix ${DATA_PATH}/bookcorpus --workers `nproc` --split-sentences
