@@ -14,13 +14,15 @@ usage() {
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --model-name) MODEL_NAME="$1"; shift ;;
-        --data-path) DATA_PATH="$1"; shift ;;
+        --model-name) MODEL_NAME="$2"; shift ;;
+        --data-path) DATA_PATH="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; usage ;;
     esac
     shift
 done
 
+echo "MODEL NAME : $MODEL_NAME"
+echo "DATA PATH NAME : $DATA_PATH"
 
 TOKENIZER_MODEL=${TMP_DIR}/tokenizer.model
 
