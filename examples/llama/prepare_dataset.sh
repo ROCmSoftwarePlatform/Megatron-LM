@@ -5,21 +5,22 @@ mkdir -p ${TMP_DIR}/data
 
 MODEL_NAME="llama2"
 TOKENIZER_MODEL_PATH=https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
+DATA_PATH="${TMP_DIR}/data"
 
 usage() {
-    echo "Usage: $0 --model-name <model name>"
+    echo "Usage: $0 --model-name <model name> --data-path <data-path>"
     exit 1
 }
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --model-name) MODEL_NAME="$1"; shift ;;
+        --data-path) DATA_PATH="$1"; shift ;;
         *) echo "unknown parameter passed: $1"; usage ;;
     esac
     shift
 done
 
-DATA_PATH="${TMP_DIR}/data"
 
 TOKENIZER_MODEL=${TMP_DIR}/tokenizer.model
 
