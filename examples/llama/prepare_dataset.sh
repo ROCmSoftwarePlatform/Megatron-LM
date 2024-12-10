@@ -2,12 +2,39 @@ TMP_DIR="tmp"
 mkdir -p $TMP_DIR
 mkdir -p ${TMP_DIR}/data
 
+
+MODEL_NAME="llama2"
+TOKENIZER_MODEL_PATH=https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
+
+usage() {
+    echo "Usage: $0 --model-name <model name>"
+    exit 1
+}
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --model-name) MODEL_NAME="$1"; shift ;;
+        *) echo "unknown parameter passed: $1"; usage ;;
+    esac
+    shift
+done
+
 DATA_PATH="${TMP_DIR}/data"
+
 TOKENIZER_MODEL=${TMP_DIR}/tokenizer.model
+
+if [[ $MODEL_NAME == "llama2" ]]; then
+    TOKENIZER_MODEL_PATH=https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
+elif [[ $MODEL_NAME == "llama3" ]]; then
+    TOKENIZER_MODEL_PATH=meta-llama/Llama-3.1-8B
+else
+    echo "Unsupported model name for dataset preparation - use --model-name as llama2/llama3"
+    exit 1
+fi
 
 # Download the tokenizer model
 if ! [ -f "$TOKENIZER_MODEL" ]; then
-wget -O $TOKENIZER_MODEL https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
+    wget -O $TOKENIZER_MODEL $TOKENIZER_MODEL_PATH 
 fi
 
 python3 prepare_bookcorpus_megatron_dataset.py --out-dir ${DATA_PATH}
