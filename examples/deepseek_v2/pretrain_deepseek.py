@@ -27,7 +27,7 @@ from megatron.training.utils import (
 
 from megatron.training.arguments import get_patch_args
 from megatron.training.tokenizer import build_tokenizer
-from megatron.training.utils import get_batch_on_this_tp_rank_original
+from megatron.training.utils import get_batch_on_this_tp_rank
 from megatron.training.global_vars import get_tokenizer
 
 from megatron.core.models.deepseekv2.layer_specs import get_gpt_layer_local_spec
@@ -96,7 +96,7 @@ def get_batch(data_iterator):
         if args.train_mode == "pretrain":
             raise ValueError('The LLama-SFT-Raw dataset should only be used for finetuning!')
         # get batches based on the TP rank you are on
-        batch = get_batch_on_this_tp_rank_original(data_iterator)
+        batch = get_batch_on_this_tp_rank(data_iterator)
         # slice batch along sequence dimension for context parallelism
         batch = get_batch_on_this_cp_rank(batch)
 

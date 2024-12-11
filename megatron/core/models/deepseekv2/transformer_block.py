@@ -26,6 +26,7 @@ from megatron.core.utils import make_sharded_tensor_for_checkpoint, make_viewles
 from megatron.core.transformer.transformer_config import TransformerConfig
 from megatron.core.transformer.transformer_layer import BaseTransformerLayer
 from .rms_norm import DeepseekV2RMSNorm
+from megatron.legacy.model.rms_norm import RMSNorm
 
 def get_num_layers_to_build(config: TransformerConfig) -> int:
 
@@ -172,8 +173,8 @@ class TransformerBlock(MegatronModule):
 
         if self.post_process and self.post_layer_norm:
             # Final layer norm before output.
-            self.final_layernorm = DeepseekV2RMSNorm(
-                hidden_size=self.config.hidden_size,
+            self.final_layernorm = RMSNorm(
+                dim=self.config.hidden_size,
                 eps=self.config.layernorm_epsilon,
                 config=self.config
             )

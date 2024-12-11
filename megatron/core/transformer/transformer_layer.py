@@ -248,6 +248,7 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
         rotary_pos_emb=None,
         inference_params=None,
         packed_seq_params=None,
+        **kwargs
     ):
         """
         Perform a forward pass through the transformer layer.
@@ -282,10 +283,10 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
         attention_output_with_bias = self.self_attention(
             input_layernorm_output,
             attention_mask=attention_mask,
-            #position_ids=position_ids,
             inference_params=inference_params,
             rotary_pos_emb=rotary_pos_emb,
             packed_seq_params=packed_seq_params,
+            **kwargs
         )
 
         # TODO: could we move `bias_dropout_add_exec_handler` itself
