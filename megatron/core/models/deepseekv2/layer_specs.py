@@ -16,9 +16,8 @@ from megatron.core.transformer.multi_latent_attention import (
     MLASelfAttentionSubmodules,
 )
 from megatron.core.transformer.spec_utils import ModuleSpec
-from megatron.core.transformer.transformer_layer import TransformerLayerSubmodules
+from megatron.core.transformer.transformer_layer import TransformerLayerSubmodules, TransformerLayer
 
-from megatron.core.models.deepseekv2.transformer_layer import DeekSeekv2TransformerLayer
 from megatron.core.models.deepseekv2.transformer.attention import DeepSeekv2Attention, DeepSeekv2SelfAttention
 
 try:
@@ -67,7 +66,7 @@ def get_gpt_layer_with_transformer_engine_spec(
     )
 
     return ModuleSpec(
-        module=DeekSeekv2TransformerLayer,
+        module=TransformerLayer,
         submodules=TransformerLayerSubmodules(
             self_attention=ModuleSpec(
                 module=DeepSeekv2SelfAttention,
@@ -118,7 +117,7 @@ def get_gpt_layer_local_spec(
     )
 
     return ModuleSpec(
-        module=DeekSeekv2TransformerLayer,
+        module=TransformerLayer,
         submodules=TransformerLayerSubmodules(
             self_attention=ModuleSpec(
                 module=DeepSeekv2SelfAttention,
