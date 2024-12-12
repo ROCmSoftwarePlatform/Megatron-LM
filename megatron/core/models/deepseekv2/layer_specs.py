@@ -4,7 +4,7 @@ from typing import Optional
 
 from megatron.core.fusions.fused_bias_dropout import get_bias_dropout_add
 from megatron.core.tensor_parallel.layers import ColumnParallelLinear, RowParallelLinear
-from megatron.core.transformer.attention import SelfAttention, SelfAttentionSubmodules, DeepSeekv2SelfAttentionSubmodules
+from megatron.core.transformer.attention import SelfAttention, SelfAttentionSubmodules
 from megatron.core.transformer.dot_product_attention import DotProductAttention
 from megatron.core.transformer.enums import AttnMaskType
 from megatron.core.transformer.identity_op import IdentityOp
@@ -71,15 +71,15 @@ def get_gpt_layer_with_transformer_engine_spec(
             self_attention=ModuleSpec(
                 module=DeepSeekv2SelfAttention,
                 params={"attn_mask_type": AttnMaskType.causal},
-                submodules=DeepSeekv2SelfAttentionSubmodules(
+                submodules=SelfAttentionSubmodules(
                     linear_q_proj=TEColumnParallelLinear,
                      linear_q_down_proj=TEColumnParallelLinear,
                      linear_q_up_proj=ColumnParallelLinear,
                      linear_kv_down_proj=TEColumnParallelLinear,
                      linear_kv_up_proj=ColumnParallelLinear,
                      linear_proj=TERowParallelLinear,
-                     q_a_layernorm=TENorm if qk_layernorm else IdentityOp,
-                     kv_a_layernorm=TENorm if qk_layernorm else IdentityOp,
+                     q_layernorm=TENorm if qk_layernorm else IdentityOp,
+                     kv_layernorm=TENorm if qk_layernorm else IdentityOp,
                      core_attention=TEDotProductAttentionMLA,
                 ),
             ),
@@ -122,15 +122,15 @@ def get_gpt_layer_local_spec(
             self_attention=ModuleSpec(
                 module=DeepSeekv2SelfAttention,
                 params={"attn_mask_type": AttnMaskType.causal},
-                submodules=DeepSeekv2SelfAttentionSubmodules(
+                submodules=SelfAttentionSubmodules(
                     linear_q_proj=ColumnParallelLinear,
                     linear_q_down_proj=ColumnParallelLinear,
                     linear_q_up_proj=ColumnParallelLinear,
                     linear_kv_down_proj=ColumnParallelLinear,
                     linear_kv_up_proj=ColumnParallelLinear,
                     linear_proj=RowParallelLinear,
-                    q_a_layernorm=RMSNorm if qk_layernorm else IdentityOp,
-                    kv_a_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                    q_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                    kv_layernorm=RMSNorm if qk_layernorm else IdentityOp,
                     core_attention=DotProductAttention,
                 ),
             ),

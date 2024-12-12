@@ -8,7 +8,7 @@ from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.utils import divide
 from megatron.core.transformer.enums import AttnMaskType
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.transformer.attention import Attention, SelfAttention, DeepSeekv2SelfAttentionSubmodules
+from megatron.core.transformer.attention import Attention, SelfAttention, SelfAttentionSubmodules
 
 from megatron.core.models.deepseekv2.yarn_rotary_pos_embedding import DeepseekV2YarnRotaryEmbedding, \
     apply_rotary_pos_emb, yarn_get_mscale
@@ -55,7 +55,7 @@ class DeepSeekv2Attention(Attention, ABC):
         """
         if self.config.q_lora_rank is not None:
             q, _ = self.linear_q_down_proj(hidden_states)
-            q = self.q_a_layernorm(q)
+            q = self.q_layernorm(q)
             q, _ = self.linear_q_up_proj(q)
         else:
             # hidden_states:[48, 1, 2048] q: [96, 1, 1536]
@@ -80,7 +80,7 @@ class DeepSeekv2Attention(Attention, ABC):
         )
 
         #[96, 1, 2048]
-        kv, _ = self.linear_kv_up_proj(self.kv_a_layernorm(compressed_kv))
+        kv, _ = self.linear_kv_up_proj(self.kv_layernorm(compressed_kv))
 
         #[96, 1, 8, 128])
         kv = kv.view(q_len, bsz, self.num_attention_heads_per_partition, self.config.qk_nope_head_dim + self.config.v_head_dim)
@@ -199,7 +199,7 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
     and returns output of the same size.
     """
     def __init__(self,config: TransformerConfig,
-                 submodules: DeepSeekv2SelfAttentionSubmodules,
+                 submodules: SelfAttentionSubmodules,
                  layer_number: int,
                  attn_mask_type=AttnMaskType.padding,):
         super().__init__(config=config,
@@ -274,15 +274,15 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
 
         if self.config.q_lora_rank is not None:
 
-            self.q_a_layernorm = build_module(
-                submodules.q_a_layernorm,
+            self.q_layernorm = build_module(
+                submodules.q_layernorm,
                 hidden_size=self.config.q_lora_rank//self.world_size,
                 config=self.config,
                 eps=self.config.layernorm_epsilon,
             )
 
-        self.kv_a_layernorm = build_module(
-            submodules.kv_a_layernorm,
+        self.kv_layernorm = build_module(
+            submodules.kv_layernorm,
             hidden_size=self.config.kv_lora_rank,
             config=self.config,
             eps=self.config.layernorm_epsilon,
