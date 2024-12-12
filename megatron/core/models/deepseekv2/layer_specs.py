@@ -36,7 +36,7 @@ try:
 except ImportError:
     HAVE_TE = False
 
-from megatron.core.models.deepseekv2.rms_norm import DeepseekV2RMSNorm
+from megatron.legacy.model.rms_norm import RMSNorm
 
 
 def get_gpt_layer_with_transformer_engine_spec(
@@ -129,15 +129,14 @@ def get_gpt_layer_local_spec(
                     linear_kv_down_proj=ColumnParallelLinear,
                     linear_kv_up_proj=ColumnParallelLinear,
                     linear_proj=RowParallelLinear,
-                    q_a_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
-                    kv_a_layernorm=DeepseekV2RMSNorm if qk_layernorm else IdentityOp,
-                    # core_attention=TEDotProductAttention,
+                    q_a_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                    kv_a_layernorm=RMSNorm if qk_layernorm else IdentityOp,
                     core_attention=DotProductAttention,
                 ),
             ),
             self_attn_bda=get_bias_dropout_add,
-            pre_mlp_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
-            input_layernorm=DeepseekV2RMSNorm if num_experts else IdentityOp,
+            pre_mlp_layernorm=RMSNorm if num_experts else IdentityOp,
+            input_layernorm=RMSNorm if num_experts else IdentityOp,
             mlp=mlp,
             mlp_dense=mlp_dense,
             mlp_bda=get_bias_dropout_add,
