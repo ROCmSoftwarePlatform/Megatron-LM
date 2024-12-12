@@ -1,5 +1,3 @@
-#From PAI
-
 import logging
 from typing import Dict, Literal, Optional, Tuple, Union
 
@@ -16,7 +14,8 @@ from megatron.core.transformer.enums import AttnMaskType, ModelType
 from megatron.core.transformer.spec_utils import ModuleSpec
 from megatron.core.transformer.transformer_config import TransformerConfig
 
-from .transformer_block import TransformerBlock
+#from .transformer_block import TransformerBlock
+from megatron.core.transformer.transformer_block import TransformerBlock
 
 
 class GPTModel(LanguageModule):

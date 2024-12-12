@@ -267,12 +267,13 @@ class TransformerBlock(MegatronModule):
         context_mask: Tensor,
         rotary_pos_emb: Tensor,
         packed_seq_params: PackedSeqParams,
+        **kwargs
     ):
         """Forward method with activation checkpointing."""
 
         def custom(start: int, end: int):
             def custom_forward(
-                hidden_states, attention_mask, context, context_mask, rotary_pos_emb
+                hidden_states, attention_mask, context, context_mask, rotary_pos_emb, **kwargs
             ):
                 for index in range(start, end):
                     layer = self._get_layer(index)
@@ -284,6 +285,7 @@ class TransformerBlock(MegatronModule):
                         rotary_pos_emb=rotary_pos_emb,
                         inference_params=None,
                         packed_seq_params=packed_seq_params,
+                        **kwargs
                     )
                 return hidden_states, context
 
@@ -301,6 +303,7 @@ class TransformerBlock(MegatronModule):
                     context,
                     context_mask,
                     rotary_pos_emb,
+                    **kwargs
                 )
             else:
                 return tensor_parallel.checkpoint(
@@ -311,6 +314,7 @@ class TransformerBlock(MegatronModule):
                     context,
                     context_mask,
                     rotary_pos_emb,
+                    **kwargs
                 )
 
         if self.config.recompute_method == 'uniform':
@@ -343,7 +347,7 @@ class TransformerBlock(MegatronModule):
                     hidden_states, context = checkpoint_handler(custom(layer_idx, layer_idx + 1))
                 else:
                     hidden_states, context = custom(layer_idx, layer_idx + 1)(
-                        hidden_states, attention_mask, context, context_mask, rotary_pos_emb
+                        hidden_states, attention_mask, context, context_mask, rotary_pos_emb, **kwargs
                     )
         else:
             raise ValueError("Invalid activation recompute method.")
@@ -398,6 +402,7 @@ class TransformerBlock(MegatronModule):
         rotary_pos_emb: Tensor = None,
         inference_params: InferenceParams = None,
         packed_seq_params: PackedSeqParams = None,
+        **kwargs
     ):
         """
         Perform the forward pass through the transformer block.
@@ -485,6 +490,7 @@ class TransformerBlock(MegatronModule):
                     context_mask=context_mask,
                     rotary_pos_emb=rotary_pos_emb,
                     packed_seq_params=packed_seq_params,
+                    **kwargs
                 )
             else:
                 for l_no, layer in enumerate(self.layers):
@@ -499,6 +505,7 @@ class TransformerBlock(MegatronModule):
                                 rotary_pos_emb=rotary_pos_emb,
                                 inference_params=inference_params,
                                 packed_seq_params=packed_seq_params,
+                                **kwargs
                             )
                         else:
                             # CUDA graph replay for layer `l_no` and microbatch
