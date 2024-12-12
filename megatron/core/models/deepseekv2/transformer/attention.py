@@ -54,9 +54,9 @@ class DeepSeekv2Attention(Attention, ABC):
         Derives `query`, `key` and `value` tensors from `hidden_states`.
         """
         if self.config.q_lora_rank is not None:
-            q, _ = self.linear_q_a_proj(hidden_states)
+            q, _ = self.linear_q_down_proj(hidden_states)
             q = self.q_a_layernorm(q)
-            q, _ = self.linear_q_b_proj(q)
+            q, _ = self.linear_q_up_proj(q)
         else:
             # hidden_states:[48, 1, 2048] q: [96, 1, 1536]
             q, _ = self.linear_q_proj(hidden_states)
@@ -71,7 +71,7 @@ class DeepSeekv2Attention(Attention, ABC):
         )
 
         # [96, 1, 576])
-        compressed_kv, _ = self.linear_kv_a_proj_with_mqa(hidden_states)
+        compressed_kv, _ = self.linear_kv_down_proj(hidden_states)
 
         #compressed_kv:[96, 1, 512], k_pe: [96, 1, 64]
         compressed_kv, k_pe = torch.split(
@@ -80,7 +80,7 @@ class DeepSeekv2Attention(Attention, ABC):
         )
 
         #[96, 1, 2048]
-        kv, _ = self.linear_kv_b_proj(self.kv_a_layernorm(compressed_kv))
+        kv, _ = self.linear_kv_up_proj(self.kv_a_layernorm(compressed_kv))
 
         #[96, 1, 8, 128])
         kv = kv.view(q_len, bsz, self.num_attention_heads_per_partition, self.config.qk_nope_head_dim + self.config.v_head_dim)
@@ -224,8 +224,8 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
 
         else:
 
-            self.linear_q_a_proj = build_module(
-                submodules.linear_q_a_proj,
+            self.linear_q_down_proj = build_module(
+                submodules.linear_q_down_proj,
                 self.config.hidden_size,
                 self.config.q_lora_rank,
                 config=self.config,
@@ -236,8 +236,8 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
                 is_expert=False,
             )
 
-            self.linear_q_b_proj = build_module(
-                submodules.linear_q_b_proj,
+            self.linear_q_up_proj = build_module(
+                submodules.linear_q_up_proj,
                 self.config.q_lora_rank//self.world_size,
                 self.config.num_attention_heads * self.q_head_dim,
                 config=self.config,
@@ -248,8 +248,8 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
                 is_expert=True,
             )
 
-        self.linear_kv_a_proj_with_mqa = build_module(
-            submodules.linear_kv_a_proj_with_mqa,
+        self.linear_kv_down_proj = build_module(
+            submodules.linear_kv_down_proj,
             self.config.hidden_size,
             (self.config.kv_lora_rank + self.config.qk_rope_head_dim)*self.world_size,
             config=self.config,
@@ -260,8 +260,8 @@ class DeepSeekv2SelfAttention(DeepSeekv2Attention):
             is_expert=False,
         )
 
-        self.linear_kv_b_proj = build_module(
-            submodules.linear_kv_b_proj,
+        self.linear_kv_up_proj = build_module(
+            submodules.linear_kv_up_proj,
             self.config.kv_lora_rank,
             self.config.num_attention_heads * (self.q_head_dim - self.config.qk_rope_head_dim + self.config.v_head_dim),
             config=self.config,
