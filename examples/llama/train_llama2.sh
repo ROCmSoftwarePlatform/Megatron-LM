@@ -182,7 +182,8 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --mock-data
+    --mock-data \
+    --no-create-attention-mask-in-dataloader
 "
 #    --data-path $DATA_PATH \
 OUTPUT_ARGS="
