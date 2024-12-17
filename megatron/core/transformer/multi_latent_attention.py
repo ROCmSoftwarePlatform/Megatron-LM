@@ -81,6 +81,8 @@ class MultiLatentAttention(Attention):
             mscale_all_dim=self.config.mscale_all_dim,
         )
 
+        kwargs = {"k_channels": self.q_head_dim,
+                  "v_channels": self.config.v_head_dim}
         self.core_attention = build_module(
             submodules.core_attention,
             config=self.config,
@@ -88,8 +90,7 @@ class MultiLatentAttention(Attention):
             attn_mask_type=self.attn_mask_type,
             attention_type=self.attention_type,
             softmax_scale=self.softmax_scale,
-            k_channels=self.q_head_dim,
-            v_channels=self.config.v_head_dim,
+            **kwargs
         )
 
         # Output.
@@ -116,7 +117,7 @@ class MultiLatentAttention(Attention):
         packed_seq_params=None,
         position_ids=None,
     ):
-        assert rotary_pos_emb is None, "Rotary position embeddings should not be passed into MLA."
+        #assert rotary_pos_emb is None, "Rotary position embeddings should not be passed into MLA."
 
         # hidden_states: [sq, b, h]
 
@@ -362,14 +363,18 @@ class MLASelfAttention(MultiLatentAttention):
             k_pos_emb, rotary_pos_emb, config=self.config, cu_seqlens=cu_seqlens_kv, mscale=mscale
         )
 
-        # query: [s, b, n, 192]
-        query = torch.cat([q_no_pe, q_pos_emb], dim=-1)
+        query_states = q_pos_emb.new_empty(bsz, self.num_attention_heads_per_partition, q_len, self.q_head_dim)
+        q_no_pe = q_no_pe.transpose(0, 1).transpose(1, 2)
+        q_pos_emb = q_pos_emb.transpose(0, 1).transpose(1, 2)
+        query_states[:, :, :, : self.config.qk_nope_head_dim] = q_no_pe
+        query_states[:, :, :, self.config.qk_nope_head_dim :] = q_pos_emb
 
-        # key: [s, b, n, 192]
-        key = torch.cat([k_no_pe, k_pos_emb], dim=-1)
+        key_states = k_pos_emb.new_empty(bsz, self.num_attention_heads_per_partition, q_len, self.q_head_dim)
+        k_pos_emb = k_pos_emb.transpose(0, 1).transpose(1, 2)
+        k_no_pe = k_no_pe.transpose(0, 1).transpose(1, 2)
+        key_states[:, :, :, : self.config.qk_nope_head_dim] = k_no_pe
+        key_states[:, :, :, self.config.qk_nope_head_dim :] = k_pos_emb
 
-        query = query.contiguous()
-        key = key.contiguous()
-        value = value.contiguous()
-
-        return query, key, value
+        query_states = query_states.transpose(1, 2).transpose(0, 1)
+        key_states = key_states.transpose(1, 2).transpose(0, 1)
+        return query_states, key_states, value

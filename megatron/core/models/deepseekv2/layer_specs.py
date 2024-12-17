@@ -120,7 +120,7 @@ def get_gpt_layer_local_spec(
         module=TransformerLayer,
         submodules=TransformerLayerSubmodules(
             self_attention=ModuleSpec(
-                module=DeepSeekv2SelfAttention,
+                module=MLASelfAttention,
                 params={"attn_mask_type": AttnMaskType.causal},
                 submodules=SelfAttentionSubmodules(
                     linear_q_proj=ColumnParallelLinear,
