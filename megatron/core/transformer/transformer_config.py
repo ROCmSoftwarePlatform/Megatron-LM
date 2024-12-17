@@ -602,3 +602,18 @@ class DeepSeekV2TransformerConfig(TransformerConfig):
 
     qk_head_dim: int = 128
     """Dimension of the head in the QK projection. q_head_dim = qk_head_dim + qk_pos_emb_head_dim"""
+
+    qk_pos_emb_head_dim: int = 64
+    """Dimension of the position embedding in the QK projection."""
+
+    beta_fast: float = 32
+    """Beta fast for YaRN RoPE."""
+
+    beta_slow: float = 1
+    """Beta slow for YaRN RoPE."""
+
+    mscale: float = 0.707
+    """Mscale for YaRN RoPE in Multi-Latent Attention."""
+
+    mscale_all_dim: float = 0.707
+    """Mscale all dimensions for YaRN RoPE in Multi-Latent Attention."""
