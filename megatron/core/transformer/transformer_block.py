@@ -1,4 +1,5 @@
 # Copyright (c) 2024, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -267,6 +268,7 @@ class TransformerBlock(MegatronModule):
         context_mask: Tensor,
         rotary_pos_emb: Tensor,
         packed_seq_params: PackedSeqParams,
+        # Add kwargs to handle position_ids.
         **kwargs
     ):
         """Forward method with activation checkpointing."""
@@ -402,6 +404,7 @@ class TransformerBlock(MegatronModule):
         rotary_pos_emb: Tensor = None,
         inference_params: InferenceParams = None,
         packed_seq_params: PackedSeqParams = None,
+        # Handle position_ids with kwargs.
         **kwargs
     ):
         """

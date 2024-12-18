@@ -1,3 +1,5 @@
+# Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
+
 import logging
 from typing import Dict, Literal, Optional, Tuple, Union
 
