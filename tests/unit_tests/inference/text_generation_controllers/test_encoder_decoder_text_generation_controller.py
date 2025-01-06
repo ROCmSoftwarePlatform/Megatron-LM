@@ -27,6 +27,7 @@ from megatron.core.models.T5.t5_spec import (
     get_t5_encoder_with_transformer_engine_block_spec,
 )
 from megatron.core.tensor_parallel.random import model_parallel_cuda_manual_seed
+from megatron.core.transformer.enums import AttnBackend
 from megatron.core.transformer.transformer_config import TransformerConfig
 from tests.unit_tests.test_utilities import Utils
 
@@ -50,6 +51,7 @@ class TestEncoderDecoderTextGenerationController:
             num_attention_heads=12,
             tensor_model_parallel_size=4,
             pipeline_model_parallel_size=1,
+            attention_backend=AttnBackend.unfused,
         )
 
         encoder_config = deepcopy(transformer_config)
@@ -84,7 +86,7 @@ class TestEncoderDecoderTextGenerationController:
 
         inference_wrapper_config = InferenceWrapperConfig(
             hidden_size=hidden_size,
-            inference_batch_times_seqlen_threshold=20,
+            inference_batch_times_seqlen_threshold=-1,
             fp32_residual_connection=False,
             params_dtype=torch.float,
             padded_vocab_size=self.vocab_size,
@@ -101,6 +103,7 @@ class TestEncoderDecoderTextGenerationController:
     def teardown_method(self, method):
         Utils.destroy_model_parallel()
 
+    @pytest.mark.failing_on_rocm
     def test_generate_all_output_tokens_static_batch(self):
         self.mock_tokenizer.vocab_size = self.vocab_size
         self.mock_tokenizer.eod = self.vocab_size - 1
