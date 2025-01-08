@@ -131,7 +131,7 @@ def get_gpt_layer_local_spec(
                     linear_proj=RowParallelLinear,
                     q_layernorm=RMSNorm if qk_layernorm else IdentityOp,
                     kv_layernorm=RMSNorm if qk_layernorm else IdentityOp,
-                    core_attention=DotProductAttention,
+                    core_attention=TEDotProductAttention,
                 ),
             ),
             self_attn_bda=get_bias_dropout_add,
