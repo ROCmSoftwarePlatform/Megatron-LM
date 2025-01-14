@@ -7,12 +7,12 @@
 export GPU_MAX_HW_QUEUES=2
 export TORCH_NCCL_HIGH_PRIORITY=1
 export NCCL_CHECKS_DISABLE=1
-export NCCL_IB_HCA=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7
+export NCCL_IB_HCA=mlx5_ib
 export NCCL_IB_GID_INDEX=3
 export NCCL_CROSS_NIC=0
 # The 2 lines below should be commented if running on AAC.
-export NCCL_SOCKET_IFNAME=ens50f0np0
-export GLOO_SOCKET_IFNAME=ens50f0np0
+#export NCCL_SOCKET_IFNAME=ib0
+#export GLOO_SOCKET_IFNAME=ib0
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_PROTO=Simple
 export RCCL_MSCCL_ENABLE=0
@@ -22,8 +22,8 @@ export TOKENIZERS_PARALLELISM=false
 export HSA_NO_SCRATCH_RECLAIM=1
 
 
-export RCCL_MSCCLPP_ENABLE=0
-export HSA_ENABLE_IPC_MODE_LEGACY=1
+# export RCCL_MSCCLPP_ENABLE=0
+# export HSA_ENABLE_IPC_MODE_LEGACY=1
 
 #export NCCL_MIN_NCHANNELS=112
 
@@ -68,12 +68,12 @@ MBS="${MBS:-1}"
 GBS="${GBS:-128}"
 SEQ_LENGTH="${SEQ_LENGTH:-8192}"
 MAX_POSITION_EMBEDDINGS="${MAX_POSITION_EMBEDDINGS:-131072}"
-TOTAL_ITERS="${TOTAL_ITERS:-20}"
+TOTAL_ITERS="${TOTAL_ITERS:-5}"
 SEQ_PARALLEL="${SEQ_PARALLEL:-1}" 
 CONTI_PARAMS="${CONTI_PARAMS:-0}"
 OPTIMIZER="${OPTIMIZER:-adam}"
 TE_FP8="${TE_FP8:-0}"
-GEMM_TUNING="${GEMM_TUNING:-0}"
+GEMM_TUNING="${GEMM_TUNING:-1}"
 MOCK_DATA="${MOCK_DATA:-0}"
 AC=${AC:-sel}
 DO=${DO:-true}
@@ -87,16 +87,17 @@ mkdir -p $EXPERIMENT_DIR
 DATA_PATH=../../../fineweb-edu/fineweb-edu-train_text_document
 
 if [ $MODEL_SIZE = 8 ]; then
-TOKENIZER_MODEL=./tokenizers/Llama-3.1-8B
+TOKENIZER_MODEL=examples/llama3/tokenizers/Llama-3.1-8B
 elif [ $MODEL_SIZE = 70 ]; then
-TOKENIZER_MODEL=./tokenizers/Llama-3.1-70B
+TOKENIZER_MODEL=examples/llama3/tokenizers/Llama-3.1-70B
+elif [ $MODEL_SIZE = 405 ]; then
+TOKENIZER_MODEL=examples/llama3/tokenizers/Llama-3.1-405B
 fi
 
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_gbs${GBS}_seqlen${SEQ_LENGTH}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}_SL_${SEQ_PARALLEL}_AC_${AC}_DO_${DO}_FL_${FL}_TE_${TE}/nocompile${NO_TORCH_COMPILE}_TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
 TRAIN_LOG="${LOG_DIR}/output_${EXP_NAME}.log"
 echo "Writing to LOG_DIR: ${LOG_DIR} ..."
-
 
 mkdir -p $LOG_DIR
 echo $TRAIN_LOG
@@ -127,6 +128,15 @@ FFN_HIDDEN_SIZE=28672
 NUM_LAYERS=80
 NUM_HEADS=64
 NUM_KV_HEADS=8
+
+elif [ $MODEL_SIZE = 405 ]; then
+
+HIDDEN_SIZE=16384 
+FFN_HIDDEN_SIZE=53248
+NUM_LAYERS=16 # e.g. llama-405B 126 layers, for 16 layers, 50B model size
+NUM_HEADS=128
+NUM_KV_HEADS=8
+MAX_POSITION_EMBEDDINGS=131072
 
 fi
 
@@ -271,7 +281,7 @@ if [ "$TE_FP8" -eq 1 ]; then
 fi
 
 run_cmd="
-    torchrun $DISTRIBUTED_ARGS ../../pretrain_gpt.py \
+    torchrun $DISTRIBUTED_ARGS pretrain_gpt.py \
         $GPT_ARGS \
         $DATA_ARGS \
         $OUTPUT_ARGS \
@@ -279,4 +289,17 @@ run_cmd="
         $TRAIN_ARGS \
 "
 
+run_cmd="$run_cmd 2>&1 | tee $TRAIN_LOG"
+
 eval $run_cmd
+
+echo '============================================================================================================' |& tee -a $TRAIN_LOG
+PERFORMANCE=$(grep -Eo 'throughput per GPU [^|]*' $TRAIN_LOG | sed -E 's/.*throughput per GPU \(TFLOP\/s\/GPU\): ([0-9\.]+).*/\1/' |  awk 'NR > 2 { sum += $1; count++ } END { if (count > 0) printf sum / count }')
+echo "throughput per GPU: $PERFORMANCE" |& tee -a $TRAIN_LOG
+
+ETPI=$(grep -Eo 'elapsed time per iteration [^|]*' $TRAIN_LOG | sed -E 's/.*elapsed time per iteration \(ms\): ([0-9\.]+).*/\1/' |  awk 'NR > 2 { sum += $1; count++ } END { if (count > 0) print sum / count }')
+echo "elapsed time per iteration: $ETPI" |& tee -a $TRAIN_LOG
+
+TGS=$(awk -v gbs="$GBS" -v sl="$SEQ_LENGTH" -v tpi="$ETPI" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", gbs * sl * 1000/ (tpi * ws)}')
+echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
+echo '============================================================================================================' |& tee -a $TRAIN_LOG
