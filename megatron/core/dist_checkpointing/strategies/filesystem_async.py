@@ -188,7 +188,8 @@ class FileSystemWriterAsync(FileSystemWriter):
         """
         w_start = time()
         write_results_or_exc: Union[dict, Exception] = dict()
-        ctx = mp.get_context('fork')
+        ctx = mp.get_context('spawn')
+        torch.distributed.init_process_group()
         local_results_queue = ctx.Queue()
         count_queue = ctx.JoinableQueue()
         p_list = []
