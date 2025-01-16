@@ -69,7 +69,7 @@ class AsyncRequest(NamedTuple):
 
 def initialize_and_run(async_fn: Callable, save_args: Tuple) -> None:
     """Initialize the process group and run the async function."""
-    torch.distributed.init_process_group()
+    torch.distributed.init_process_group(backend='nccl')
     async_fn(*save_args)
 
 class DistributedAsyncCaller:
