@@ -571,6 +571,7 @@ class MLATransformerConfig(TransformerConfig):
     mscale_all_dim: float = 0.707
     """Mscale all dimensions for YaRN RoPE in Multi-Latent Attention."""
 
+    qk_nope_head_dim: int = 128
 
 @dataclass
 class DeepSeekV2TransformerConfig(TransformerConfig):
