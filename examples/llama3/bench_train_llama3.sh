@@ -25,7 +25,7 @@ export HSA_NO_SCRATCH_RECLAIM=1
 # export RCCL_MSCCLPP_ENABLE=0
 # export HSA_ENABLE_IPC_MODE_LEGACY=1
 
-#export NCCL_MIN_NCHANNELS=112
+export NCCL_MIN_NCHANNELS=112
 
 
 # parsing input arguments
@@ -133,7 +133,7 @@ elif [ $MODEL_SIZE = 405 ]; then
 
 HIDDEN_SIZE=16384 
 FFN_HIDDEN_SIZE=53248
-NUM_LAYERS=16 # e.g. llama-405B 126 layers, for 16 layers, 50B model size
+NUM_LAYERS=2 # e.g. llama-405B 126 layers, for 16 layers, 50B model size
 NUM_HEADS=128
 NUM_KV_HEADS=8
 MAX_POSITION_EMBEDDINGS=131072
@@ -172,6 +172,7 @@ GPT_ARGS="
     --no-masked-softmax-fusion \
     --disable-bias-linear \
     --no-create-attention-mask-in-dataloader \
+    --no-check-for-nan-in-loss-and-grad \
 "
 
 if [ "$PP_VP" != "None" ]; then
