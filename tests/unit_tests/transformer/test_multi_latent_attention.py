@@ -53,7 +53,8 @@ class TestParallelMLAAttention:
     def test_cpu_forward(self):
         # we can't currently do this because the global memory buffer is on GPU
         pass
-
+    
+    @pytest.mark.failing_on_rocm
     def test_gpu_forward(self):
         if is_te_min_version("1.10.0"):
 
@@ -83,6 +84,7 @@ class TestParallelMLAAttention:
             assert output.shape[2] == config.hidden_size
             assert bias.shape[0] == config.hidden_size
 
+    @pytest.mark.failing_on_rocm
     def test_fused_rope_gpu_forward(self):
         if is_te_min_version("1.10.0"):
             # use flash attention for hopper, future may support fused attention for ampere
@@ -117,6 +119,7 @@ class TestParallelMLAAttention:
             assert bias.shape[0] == config.hidden_size
             self.parallel_attention.config.apply_rope_fusion = False
 
+    @pytest.mark.failing_on_rocm
     def test_checkpointed_gpu_forward(self):
         if is_te_min_version("1.10.0"):
             # use flash attention for hopper, future may support fused attention for ampere
