@@ -113,11 +113,11 @@ fi
 
 if [[ $MODEL_SIZE -eq 7 ]]; then #llama2-7B
         HIDDEN_SIZE=4096 # e.g. llama-13b: 5120
-        FFN_HIDDEN_SIZE=14336 # e.g. llama-13b: 13824
+        FFN_HIDDEN_SIZE=11008 # e.g. llama-13b: 13824
         NUM_LAYERS=32 # e.g. llama-13b: 40
         NUM_HEADS=32 # e.g. llama-13b: 40
         SEQ_LENGTH=$SEQ_LENGTH
-        NUM_KV_HEADS=8 # llama2 70B uses GQA
+        NUM_KV_HEADS=32 # No GQA for llama2 7b.
 elif [[ $MODEL_SIZE -eq 70 ]]; then
         HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
         FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
