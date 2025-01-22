@@ -56,10 +56,8 @@ def model_provider(
     # if use_te:
     if args.deprecated_use_mcore_models:
         print_rank_0("building deepseek_v2 model ...")
-        # transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec(
-        #     args.num_experts, args.moe_grouped_gemm, args.qk_layernorm
-        # )
-        transformer_layer_spec = get_gpt_layer_local_spec(args.num_experts, args.moe_grouped_gemm, 
+
+        transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec(args.num_experts, args.moe_grouped_gemm, 
                                                           qk_layernorm=True)
         model = GPTModel(
             config=config,
