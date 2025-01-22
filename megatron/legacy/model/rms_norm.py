@@ -6,21 +6,21 @@ from torch import nn
 class RMSNorm(torch.nn.Module):
 
     def __init__(self,
-                 hidden_size: int,
+                 dim: int,
                  eps: float = 1e-6,
                  sequence_parallel: bool = False,
                  config: dict = None):
         """RMS Normaliation module
 
         Args:
-            hidden_size (int): The width of input
+            dim (int): The width of input, i.e. hidden size
             eps (float): epsilon to use for the norm, default to 1e-6
             sequence_parallel (bool): Set to true if sequence parallelism is being used,
               this marks the weights as needing to be allreduced.
         """
         super().__init__()
         self.eps = eps
-        self.weight = nn.Parameter(torch.ones(hidden_size))
+        self.weight = nn.Parameter(torch.ones(dim))
 
         setattr(self.weight, 'sequence_parallel', sequence_parallel)
 

@@ -18,7 +18,6 @@ from megatron.core.transformer.multi_latent_attention import (
 from megatron.core.transformer.spec_utils import ModuleSpec
 from megatron.core.transformer.transformer_layer import TransformerLayerSubmodules, TransformerLayer
 
-from megatron.core.models.deepseekv2.transformer.attention import DeepSeekv2Attention, DeepSeekv2SelfAttention
 
 try:
     from megatron.core.extensions.transformer_engine import (
@@ -69,7 +68,7 @@ def get_gpt_layer_with_transformer_engine_spec(
         module=TransformerLayer,
         submodules=TransformerLayerSubmodules(
             self_attention=ModuleSpec(
-                module=DeepSeekv2SelfAttention,
+                module=MLASelfAttention,
                 params={"attn_mask_type": AttnMaskType.causal},
                 submodules=SelfAttentionSubmodules(
                     linear_q_proj=TEColumnParallelLinear,
@@ -80,7 +79,7 @@ def get_gpt_layer_with_transformer_engine_spec(
                      linear_proj=TERowParallelLinear,
                      q_layernorm=TENorm if qk_layernorm else IdentityOp,
                      kv_layernorm=TENorm if qk_layernorm else IdentityOp,
-                     core_attention=TEDotProductAttentionMLA,
+                     core_attention=TEDotProductAttention,
                 ),
             ),
             self_attn_bda=get_bias_dropout_add,
@@ -129,14 +128,14 @@ def get_gpt_layer_local_spec(
                     linear_kv_down_proj=ColumnParallelLinear,
                     linear_kv_up_proj=ColumnParallelLinear,
                     linear_proj=RowParallelLinear,
-                    q_layernorm=RMSNorm if qk_layernorm else IdentityOp,
-                    kv_layernorm=RMSNorm if qk_layernorm else IdentityOp,
+                    q_layernorm=TENorm if qk_layernorm else IdentityOp,
+                    kv_layernorm=TENorm if qk_layernorm else IdentityOp,
                     core_attention=TEDotProductAttention,
                 ),
             ),
             self_attn_bda=get_bias_dropout_add,
-            pre_mlp_layernorm=RMSNorm if num_experts else IdentityOp,
-            input_layernorm=RMSNorm if num_experts else IdentityOp,
+            pre_mlp_layernorm=TENorm if num_experts else IdentityOp,
+            input_layernorm=TENorm if num_experts else IdentityOp,
             mlp=mlp,
             mlp_dense=mlp_dense,
             mlp_bda=get_bias_dropout_add,
