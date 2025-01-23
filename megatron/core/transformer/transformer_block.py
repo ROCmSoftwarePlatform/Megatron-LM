@@ -16,7 +16,7 @@ from megatron.core.packed_seq_params import PackedSeqParams
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.transformer.transformer_layer import BaseTransformerLayer
+from megatron.core.transformer.transformer_layer import BaseTransformerLayer, TransformerLayer
 from megatron.core.transformer.utils import sharded_state_dict_default
 from megatron.core.utils import is_te_min_version, make_viewless_tensor
 
@@ -40,9 +40,9 @@ except ImportError:
         LayerNormImpl = FusedLayerNorm
 
     except ImportError:
-        from megatron.core.transformer.torch_layer_norm import WrappedTorchLayerNorm
+        from megatron.core.transformer.torch_norm import WrappedTorchNorm
 
-        LayerNormImpl = WrappedTorchLayerNorm
+        LayerNormImpl = WrappedTorchNorm
 
 
 def get_num_layers_to_build(config: TransformerConfig) -> int:
@@ -267,6 +267,7 @@ class TransformerBlock(MegatronModule):
         context: Tensor,
         context_mask: Tensor,
         rotary_pos_emb: Tensor,
+        attention_bias: Tensor,
         packed_seq_params: PackedSeqParams,
         # Add kwargs to handle position_ids.
         **kwargs
@@ -285,6 +286,7 @@ class TransformerBlock(MegatronModule):
                         context=context,
                         context_mask=context_mask,
                         rotary_pos_emb=rotary_pos_emb,
+                        attention_bias=attention_bias,
                         inference_params=None,
                         packed_seq_params=packed_seq_params,
                         **kwargs
@@ -294,6 +296,7 @@ class TransformerBlock(MegatronModule):
             return custom_forward
 
         def checkpoint_handler(forward_func):
+            """Determines whether to use the `te_checkpoint` or `tensor_parallel.checkpoint`"""
             if self.config.fp8:
                 return te_checkpoint(
                     forward_func,
@@ -372,6 +375,7 @@ class TransformerBlock(MegatronModule):
         context: Tensor,
         context_mask: Tensor,
         rotary_pos_emb: Tensor,
+        attention_bias: Tensor,
         inference_params: InferenceParams,
         packed_seq_params: PackedSeqParams,
     ):
@@ -402,6 +406,9 @@ class TransformerBlock(MegatronModule):
         context: Tensor = None,
         context_mask: Tensor = None,
         rotary_pos_emb: Tensor = None,
+        rotary_pos_cos: Tensor = None,
+        rotary_pos_sin: Tensor = None,
+        attention_bias: Tensor = None,
         inference_params: InferenceParams = None,
         packed_seq_params: PackedSeqParams = None,
         # Handle position_ids with kwargs.
@@ -421,6 +428,9 @@ class TransformerBlock(MegatronModule):
             context (Tensor, optional): Context tensor for cross-attention.
             context_mask (Tensor, optional): Mask for cross-attention context
             rotary_pos_emb (Tensor, optional): Rotary positional embeddings.
+            attention_bias (Tensor): Bias tensor for Q * K.T of shape in shape broadcastable
+                to [b, num_head, sq, skv], e.g. [1, 1, sq, skv].
+                Used as an alternative to apply attention mask for TE cuDNN attention.
             inference_params (InferenceParams, optional): Parameters for inference-time
                 optimizations.
             packed_seq_params (PackedSeqParams, optional): Parameters for packed sequence
@@ -483,7 +493,7 @@ class TransformerBlock(MegatronModule):
         else:
             fp8_context = nullcontext()
 
-        with rng_context and fp8_context:
+        with rng_context, fp8_context:
             # Forward pass.
             if self.config.recompute_granularity == 'full' and self.training:
                 hidden_states = self._checkpointed_forward(
@@ -492,6 +502,7 @@ class TransformerBlock(MegatronModule):
                     context=context,
                     context_mask=context_mask,
                     rotary_pos_emb=rotary_pos_emb,
+                    attention_bias=attention_bias,
                     packed_seq_params=packed_seq_params,
                     **kwargs
                 )
@@ -506,6 +517,9 @@ class TransformerBlock(MegatronModule):
                                 context=context,
                                 context_mask=context_mask,
                                 rotary_pos_emb=rotary_pos_emb,
+                                rotary_pos_cos=rotary_pos_cos,
+                                rotary_pos_sin=rotary_pos_sin,
+                                attention_bias=attention_bias,
                                 inference_params=inference_params,
                                 packed_seq_params=packed_seq_params,
                                 **kwargs
@@ -526,6 +540,7 @@ class TransformerBlock(MegatronModule):
                                 context,
                                 context_mask,
                                 rotary_pos_emb,
+                                attention_bias,
                                 inference_params,
                                 packed_seq_params,
                             )
@@ -572,12 +587,15 @@ class TransformerBlock(MegatronModule):
         non_homogeneous_layers = metadata is not None and metadata.get(
             'non_homogeneous_layers', False
         )
+        if self.config.num_moe_experts is not None:
+            non_homogeneous_layers = True
+
         sharded_state_dict = {}
 
         layer_prefix = f'{prefix}layers.'
         num_layers = self.config.num_layers
         for layer in self.layers:
-            offset = layer._get_layer_offset()
+            offset = TransformerLayer._get_layer_offset(self.config)
 
             global_layer_offset = layer.layer_number - 1  # self.layer_number starts at 1
             state_dict_prefix = f'{layer_prefix}{global_layer_offset - offset}.'  # module list index in TransformerBlock # pylint: disable=line-too-long

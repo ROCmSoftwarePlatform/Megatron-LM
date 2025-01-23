@@ -60,6 +60,7 @@ class MultiLatentAttention(Attention):
         layer_number: int,
         attn_mask_type: AttnMaskType,
         attention_type: str,
+        cp_comm_type: str = None,
     ) -> None:
         world_size = parallel_state.get_tensor_model_parallel_world_size()
         assert (
@@ -102,7 +103,9 @@ class MultiLatentAttention(Attention):
             attn_mask_type=self.attn_mask_type,
             attention_type=self.attention_type,
             softmax_scale=self.softmax_scale,
+            cp_comm_type=cp_comm_type,
             **kwargs
+            
         )
 
         # Output.
@@ -126,10 +129,18 @@ class MultiLatentAttention(Attention):
         key_value_states=None,
         inference_params=None,
         rotary_pos_emb=None,
+        rotary_pos_cos=None,
+        rotary_pos_sin=None,
+        attention_bias=None,
         packed_seq_params=None,
         position_ids=None,
     ):
-        #assert rotary_pos_emb is None, "Rotary position embeddings should not be passed into MLA."
+        """Forward pass for multi-latent attention"""
+        assert rotary_pos_emb is None, "Rotary position embeddings should not be passed into MLA."
+        assert attention_bias is None, "Attention bias should not be passed into MLA."
+        assert (
+            rotary_pos_cos is None and rotary_pos_sin is None
+        ), "MLA does not support Flash Decoding"
 
         # hidden_states: [sq, b, h]
 
@@ -151,8 +162,8 @@ class MultiLatentAttention(Attention):
         # Adjust key, value for inference
         # ===================================================
         # rotary_pos_emb = None
-        key, value, _, attn_mask_type = self._adjust_key_value_for_inference(
-            inference_params, key, value, rotary_pos_emb=None
+        query, key, value, _, attn_mask_type = self._adjust_key_value_for_inference(
+            inference_params, query, key, value, rotary_pos_emb=None
         )
 
         # ==================================
@@ -201,6 +212,7 @@ class MLASelfAttention(MultiLatentAttention):
         submodules: MLASelfAttentionSubmodules,
         layer_number: int,
         attn_mask_type=AttnMaskType.padding,
+        cp_comm_type: str = None,
     ):
         super().__init__(
             config=config,
