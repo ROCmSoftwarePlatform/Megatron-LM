@@ -116,7 +116,6 @@ if [[ $MODEL_SIZE -eq 7 ]]; then #llama2-7B
         FFN_HIDDEN_SIZE=11008 # e.g. llama-13b: 13824
         NUM_LAYERS=32 # e.g. llama-13b: 40
         NUM_HEADS=32 # e.g. llama-13b: 40
-        SEQ_LENGTH=$SEQ_LENGTH
         NUM_KV_HEADS=32 # No GQA for llama2 7b.
 elif [[ $MODEL_SIZE -eq 70 ]]; then
         HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
@@ -124,7 +123,6 @@ elif [[ $MODEL_SIZE -eq 70 ]]; then
         NUM_LAYERS=80 # e.g. llama-13b: 40
         NUM_HEADS=64 # e.g. llama-13b: 40
         NUM_KV_HEADS=8 # llama3 70B uses GQA
-        SEQ_LENGTH=$SEQ_LENGTH
 else
         echo "Model size not supported."
         exit 1
