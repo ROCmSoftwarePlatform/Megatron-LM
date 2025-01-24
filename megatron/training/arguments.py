@@ -1030,6 +1030,8 @@ def _add_network_size_args(parser):
                        action='store_false',
                        help='Disable position embedding. Deprecated: use --position-embedding-type',
                        dest='add_position_embedding')
+    group.add_argument('--disable-te-fused-rope', action='store_true', default = False,
+                       help='Disable fused rope from transformer-engine: use --disable_te_fused_rope')
     group.add_argument('--make-vocab-size-divisible-by', type=int, default=128,
                        help='Pad the vocab size to be divisible by this value.'
                        'This is added for computational efficieny reasons.')
@@ -1879,7 +1881,8 @@ def _add_tokenizer_args(parser):
                                 'Llama2Tokenizer',
                                 'TikTokenizer',
                                 'MultimodalTokenizer',
-                                'NullTokenizer'],
+                                'NullTokenizer',
+                                'DeepSeekV2Tokenizer'],
                        help='What type of tokenizer to use.')
     group.add_argument('--tokenizer-model', type=str, default=None,
                        help='Sentencepiece tokenizer model.')
@@ -1960,27 +1963,6 @@ def _add_data_args(parser):
                        help='Probability of producing a short sequence.')
     group.add_argument('--num-workers', type=int, default=2,
                        help="Dataloader number of workers.")
-    group.add_argument('--tokenizer-type', type=str,
-                       default=None,
-                       choices=['BertWordPieceLowerCase',
-                                'BertWordPieceCase',
-                                'GPT2BPETokenizer',
-                                'SentencePieceTokenizer',
-                                'GPTSentencePieceTokenizer',
-                                'HuggingFaceTokenizer',
-                                'Llama2Tokenizer',
-                                'TikTokenizer',
-                                'NullTokenizer',
-                                'DeepSeekV2Tokenizer'],
-                       help='What type of tokenizer to use.')
-    group.add_argument('--tokenizer-model', type=str, default=None,
-                       help='Sentencepiece tokenizer model.')
-    group.add_argument('--tiktoken-pattern', type=str, default=None,
-                       help='Which tiktoken pattern to use. Options: [v1, v2]')
-    group.add_argument('--tiktoken-num-special-tokens', type=int, default=1000,
-                       help='Number of special tokens in tiktoken tokenizer')
-    group.add_argument('--tiktoken-special-tokens', type=str, nargs='+', default=None,
-                       help='List of tiktoken special tokens, needs to have ["<unk>", "<s>", "</s>"]')
     group.add_argument('--reset-position-ids', action='store_true',
                        help='Reset posistion ids after end-of-document token.')
     group.add_argument('--reset-attention-mask', action='store_true',
@@ -2380,8 +2362,6 @@ def get_patch_args(parser):
 
     group.add_argument("--num-shared-experts", type=int, default=None)
 
-    group.add_argument("--moe-layer-freq", type=int, default=1)
-
     group.add_argument(
         "--optimizer-offload-policy",
         default="static",
@@ -2588,9 +2568,6 @@ def _add_moe_args(parser):
                             'where 1 indicates an expert layer and 0 indicates a dense layer. '
                             'Examples: "([0]+[1]*23)": 1 dense layer followed by 23 experts layers, '
                             '"([1]*3+[0]*2)*2": Three expert layers followed by two dense layers, repeated twice.')
-    group.add_argument('--moe-ffn-hidden-size', type=int, default=None,
-                       help='The hidden size of each expert\'s feed-forward network (ffn). '
-                       'If not specified, defaults to the ffn_hidden_size.')
     group.add_argument('--moe-shared-expert-intermediate-size', type=int, default=None,
                        help='Shared expert total ffn hidden size. '
                        'It should be equal to "num_shared_experts * ffn_size_of_each_shared_expert" if there are multiple shared experts. '

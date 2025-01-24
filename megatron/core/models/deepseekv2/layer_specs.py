@@ -17,7 +17,7 @@ from megatron.core.transformer.multi_latent_attention import (
 )
 from megatron.core.transformer.spec_utils import ModuleSpec
 from megatron.core.transformer.transformer_layer import TransformerLayerSubmodules, TransformerLayer
-
+from megatron.core.transformer.moe.experts import SequentialMLP, GroupedMLP, TEGroupedMLP
 
 try:
     from megatron.core.extensions.transformer_engine import (
@@ -61,7 +61,7 @@ def get_gpt_layer_with_transformer_engine_spec(
         use_te=True, num_experts=num_experts, moe_grouped_gemm=moe_grouped_gemm, fp8=fp8
     )
     mlp_dense = _get_mlp_module_spec(
-        use_te=False, num_experts=None, moe_grouped_gemm=moe_grouped_gemm
+        use_te=True, num_experts=None, moe_grouped_gemm=moe_grouped_gemm
     )
 
     return ModuleSpec(
@@ -180,10 +180,8 @@ def _get_mlp_module_spec(
         return ModuleSpec(
             module=MoELayer,
             submodules=MoESubmodules(
-                experts=(
-                    MLPSubmodules(linear_fc1=linear_fc1, linear_fc2=linear_fc2)
-                    if not moe_grouped_gemm or use_te_grouped_gemm
-                    else None
+                experts=ModuleSpec(
+                    module=GroupedMLP
                 ),
                 shared_experts=ModuleSpec(
                     module=SharedExpertMLP,
