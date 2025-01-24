@@ -88,7 +88,7 @@ TOKENIZER_MODEL=meta-llama/Llama-3.1-8B
 
 DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
-MAX_POSITION_EMBEDDINGS=128000
+MAX_POSITION_EMBEDDINGS=131072
 
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
@@ -114,7 +114,8 @@ if [[ $MODEL_SIZE -eq 8 ]]; then #llama2-7B
         NUM_LAYERS=32 # e.g. llama-13b: 40
         NUM_HEADS=32 # e.g. llama-13b: 40
         SEQ_LENGTH=$SEQ_LENGTH
-        NUM_KV_HEADS=8 # llama2 70B uses GQA
+        NUM_KV_HEADS=8 
+        MAX_POSITION_EMBEDDINGS=$MAX_POSITION_EMBEDDINGS
 elif [[ $MODEL_SIZE -eq 70 ]]; then
         HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
         FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
