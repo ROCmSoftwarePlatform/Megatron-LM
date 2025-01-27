@@ -199,23 +199,6 @@ def get_args():
                        help='Split documents into sentences.')
     group.add_argument('--keep-newlines', action='store_true',
                        help='Keep newlines between sentences when splitting.')
-
-    group = parser.add_argument_group(title='tokenizer')
-    group.add_argument('--tokenizer-type', type=str, required=True,
-                       choices=['BertWordPieceLowerCase','BertWordPieceCase',
-                                'GPT2BPETokenizer', 'SentencePieceTokenizer',
-                                'GPTSentencePieceTokenizer', 'Llama2Tokenizer',
-                                'Llama3Tokenizer', 'MistralTokenizer', 'HuggingFaceTokenizer', 
-                                'NullTokenizer', 'DeepSeekV2Tokenizer'],
-                       help='What type of tokenizer to use.')
-    group.add_argument('--tokenizer-model', type=str, default=None,
-                       help='YTTM tokenizer model.')
-    group.add_argument('--vocab-file', type=str, default=None,
-                       help='Path to the vocab file')
-    group.add_argument('--vocab-size', default=786,
-                       help='size of vocab for use with NullTokenizer')
-    group.add_argument('--merge-file', type=str, default=None,
-                       help='Path to the BPE merge file (if necessary).')
     group = parser.add_argument_group(title='tokenization process')
     group.add_argument('--append-eod', action='store_true',
                        help='Append an <eod> token to the end of a document.')
