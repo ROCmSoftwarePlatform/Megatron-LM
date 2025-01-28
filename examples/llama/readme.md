@@ -131,7 +131,7 @@ If you're running multi-node training, update the following environment variable
   `1` to enable Flash Attention.
 
 - **FSDP:**  
-  0 for disabling fsdp, 1 for using torch fsdp-v2. 
+  `1` to enable torch fsdp-v2. 
   
   Note that if FSDP is enabled, `--use-distributed-optimizer`, `--overlap-param-gather`, `--sequence-parallel` will be automatically set off. 
 
