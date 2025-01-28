@@ -71,7 +71,7 @@ class MLP(MegatronModule):
         self.input_size = input_size if input_size != None else self.config.hidden_size
 
         # If this is a gated linear unit we double the output width, see https://arxiv.org/pdf/2002.05202.pdf
-        if is_expert is True:
+        if is_expert:
             ffn_hidden_size = self.config.ffn_hidden_size if not self.config.moe_ffn_hidden_size else self.config.moe_ffn_hidden_size
         else:
             if not is_shared_expert:

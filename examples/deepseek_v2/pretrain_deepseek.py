@@ -34,7 +34,6 @@ from megatron.training.utils import (
 
 from megatron.training.arguments import get_patch_args
 from megatron.training.tokenizer import build_tokenizer
-from megatron.training.utils import get_batch_on_this_tp_rank
 from megatron.training.global_vars import get_tokenizer
 
 from megatron.core.models.deepseekv2.layer_specs import get_gpt_layer_local_spec, get_gpt_layer_with_transformer_engine_spec
