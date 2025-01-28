@@ -24,6 +24,11 @@ To run the training on a single node, go to Megatron-LM folder, use the followin
 TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
 ```
 
+To run the training with FSDP-v2 enabled, go to Megatron-LM folder, use the following command:
+```bash
+TEE_OUTPUT=1 MBS=2 BS=16 TP=1 TE_FP8=0 FSDP=1 SEQ_LENGTH=4096 bash examples/llama/train_llama2_fsdpv2.sh
+```
+
 
 ### 2.2 Multi-node Training
 To run training on multiple nodes, launch the Docker container on each node. Follow these steps:
@@ -113,6 +118,9 @@ If you're running multi-node training, update the following environment variable
 
 - **USE_FLASH_ATTN:**  
   `1` to enable Flash Attention.
+
+- **FSDP:**  
+  0 for disable fsdp, 1 for using torch fsdp-v2.
 
 - **ENABLE_PROFILING:**  
   `1` to enable PyTorch profiling for performance analysis.
