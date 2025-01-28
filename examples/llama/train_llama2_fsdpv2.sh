@@ -72,8 +72,22 @@ FSDP="${FSDP:-1}"
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 
-DATA_PATH="../llama2_data/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document"
-TOKENIZER_MODEL="../llama2_data/tokenizer_llama2/"
+DATA_DIR="${DATA_DIR:-/root/.cache/data}"
+DATA_PATH="${DATA_PATH:-"$DATA_DIR/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document"}"
+
+TOKENIZER_MODEL="${TOKENIZER_MODEL:-"$DATA_DIR/tokenizer_llama2"}"
+# Download the tokenizer model
+if ! [ -d "$TOKENIZER_MODEL" ]; then
+  mkdir -p $TOKENIZER_MODEL
+  wget -O $TOKENIZER_MODEL/special_tokens_map.json https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/special_tokens_map.json
+  wget -O $TOKENIZER_MODEL/tokenizer.json https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.json
+  wget -O $TOKENIZER_MODEL/tokenizer.model https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
+  wget -O $TOKENIZER_MODEL/tokenizer_config.json https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer_config.json
+
+  echo "Tokenizer files downloaded successfully to $TOKENIZER_MODEL."
+else
+  echo "Folder $TOKENIZER_MODEL already exists. Skipping download."
+fi
 
 MAX_POSITION_EMBEDDINGS=128000
 

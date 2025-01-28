@@ -24,9 +24,9 @@ To run the training on a single node, go to Megatron-LM folder, use the followin
 TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
 ```
 
-To run the training with FSDP-v2 enabled, go to Megatron-LM folder, use the following command:
+To run the training with `FSDP-v2` enabled, simply add `FSDP=1` argument, for example, use the following command:
 ```bash
-TEE_OUTPUT=1 MBS=2 BS=16 TP=1 TE_FP8=0 FSDP=1 SEQ_LENGTH=4096 bash examples/llama/train_llama2_fsdpv2.sh
+TEE_OUTPUT=1 MBS=2 BS=16 TP=1 TE_FP8=0 FSDP=1 SEQ_LENGTH=8192 bash examples/llama/train_llama2_fsdpv2.sh
 ```
 
 
@@ -85,6 +85,17 @@ You can use either mock data or real data for training.
   TOKENIZER_MODEL=meta-llama/Llama-3.1-8B  # For Llama3
   ```
 
+- **Note:**
+  If using `HuggingFaceTokenizer` as the tokenizer-type for Llama2 training, you need to set path to tokenizer path (not `tokenizer.model` path), for example: 
+  ```bash
+    TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama2
+  ```  
+
+  Similarly, if using `Wikipedia-en` data for training Megatron-LM, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
+  ```bash
+  DATA_PATH=${DATA_DIR}/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document
+  ``` 
+
 ### 3.4 Multi-node Training
 If you're running multi-node training, update the following environment variables:
 
@@ -120,7 +131,9 @@ If you're running multi-node training, update the following environment variable
   `1` to enable Flash Attention.
 
 - **FSDP:**  
-  0 for disable fsdp, 1 for using torch fsdp-v2.
+  0 for disabling fsdp, 1 for using torch fsdp-v2. 
+  
+  Note that if FSDP is enabled, `--use-distributed-optimizer`, `--overlap-param-gather`, `--sequence-parallel` will be automatically set off. 
 
 - **ENABLE_PROFILING:**  
   `1` to enable PyTorch profiling for performance analysis.
