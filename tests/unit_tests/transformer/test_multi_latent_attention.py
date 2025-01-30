@@ -56,7 +56,7 @@ class TestParallelMLAAttention:
     def test_cpu_forward(self):
         # we can't currently do this because the global memory buffer is on GPU
         pass
-    
+
     def test_gpu_forward(self):
         if is_te_min_version("1.10.0"):
 

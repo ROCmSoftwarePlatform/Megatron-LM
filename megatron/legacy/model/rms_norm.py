@@ -1,4 +1,5 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
 import torch
 from torch import nn
