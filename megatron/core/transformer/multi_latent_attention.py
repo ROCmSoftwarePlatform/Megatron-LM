@@ -1,4 +1,16 @@
-# Copyright (c) 2024, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2024, Alibaba PAI and Nvidia Megatron-LM Team.
+# Copyright (c) 2024, Advanced Micro Devices, Inc. All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 
 import math
@@ -48,6 +60,7 @@ class MultiLatentAttention(Attention):
         layer_number: int,
         attn_mask_type: AttnMaskType,
         attention_type: str,
+        cp_comm_type: str = None,
     ) -> None:
         world_size = parallel_state.get_tensor_model_parallel_world_size()
         assert (
@@ -80,7 +93,9 @@ class MultiLatentAttention(Attention):
             mscale=self.config.mscale,
             mscale_all_dim=self.config.mscale_all_dim,
         )
-
+        # Add kv channels as kwargs for DotProductAttention 
+        kwargs = {"k_channels": self.q_head_dim,
+                  "v_channels": self.config.v_head_dim}
         self.core_attention = build_module(
             submodules.core_attention,
             config=self.config,
@@ -88,8 +103,9 @@ class MultiLatentAttention(Attention):
             attn_mask_type=self.attn_mask_type,
             attention_type=self.attention_type,
             softmax_scale=self.softmax_scale,
-            k_channels=self.q_head_dim,
-            v_channels=self.config.v_head_dim,
+            cp_comm_type=cp_comm_type,
+            **kwargs
+            
         )
 
         # Output.
@@ -113,10 +129,18 @@ class MultiLatentAttention(Attention):
         key_value_states=None,
         inference_params=None,
         rotary_pos_emb=None,
+        rotary_pos_cos=None,
+        rotary_pos_sin=None,
+        attention_bias=None,
         packed_seq_params=None,
         position_ids=None,
     ):
+        """Forward pass for multi-latent attention"""
         assert rotary_pos_emb is None, "Rotary position embeddings should not be passed into MLA."
+        assert attention_bias is None, "Attention bias should not be passed into MLA."
+        assert (
+            rotary_pos_cos is None and rotary_pos_sin is None
+        ), "MLA does not support Flash Decoding"
 
         # hidden_states: [sq, b, h]
 
@@ -138,8 +162,8 @@ class MultiLatentAttention(Attention):
         # Adjust key, value for inference
         # ===================================================
         # rotary_pos_emb = None
-        key, value, _, attn_mask_type = self._adjust_key_value_for_inference(
-            inference_params, key, value, rotary_pos_emb=None
+        query, key, value, _, attn_mask_type = self._adjust_key_value_for_inference(
+            inference_params, query, key, value, rotary_pos_emb=None
         )
 
         # ==================================
@@ -188,6 +212,7 @@ class MLASelfAttention(MultiLatentAttention):
         submodules: MLASelfAttentionSubmodules,
         layer_number: int,
         attn_mask_type=AttnMaskType.padding,
+        cp_comm_type: str = None,
     ):
         super().__init__(
             config=config,
@@ -366,6 +391,7 @@ class MLASelfAttention(MultiLatentAttention):
         query = torch.cat([q_no_pe, q_pos_emb], dim=-1)
 
         # key: [s, b, n, 192]
+        k_pos_emb = k_pos_emb.expand(-1, -1, self.config.num_attention_heads, -1)
         key = torch.cat([k_no_pe, k_pos_emb], dim=-1)
 
         query = query.contiguous()

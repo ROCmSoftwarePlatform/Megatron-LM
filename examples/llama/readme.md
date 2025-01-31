@@ -21,7 +21,7 @@ This guide provides the steps for setting up the environment and configuring the
 ### 2.1 Single Node Training
 To run the training on a single node, go to Megatron-LM folder, use the following command:
 ```bash
-TEE_OUTPUT=1 MBS=5 BS=120 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
 ```
 
 
@@ -30,12 +30,12 @@ To run training on multiple nodes, launch the Docker container on each node. Fol
 
 - **On the Master Node:**
   ```bash
-  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+  TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
   ```
 
-- **On the Slave Node(s):**
+- **On the Worker Node(s):**
   ```bash
-  TEE_OUTPUT=1 MBS=4 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
+  TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train_llama2.sh
   ```
 
 ## 3. Configurations in Script (`Megatron/examples/llama`)
@@ -96,7 +96,7 @@ If you're running multi-node training, update the following environment variable
   ```
 
 - **Node Rank:**  
-  Set the rank of each node (0 for master, 1 for the first slave node, etc.):
+  Set the rank of each node (0 for master, 1 for the first worker node, etc.):
   ```bash
   NODE_RANK="${NODE_RANK:-0}"
   ```

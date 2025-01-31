@@ -13,8 +13,6 @@ export NCCL_CHECKS_DISABLE=1
 export NCCL_IB_HCA=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7 
 export NCCL_IB_GID_INDEX=3
 export NCCL_CROSS_NIC=0
-export NCCL_SOCKET_IFNAME=ens50f0np0 # network interface  
-export GLOO_SOCKET_IFNAME=ens50f0np0 # network interface
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_PROTO=Simple
 export RCCL_MSCCL_ENABLE=0
@@ -57,6 +55,14 @@ NNODES="${NNODES:-1}"
 NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
+if [ "${NNODES:-1}" -gt 1 ]; then
+    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens5}"
+    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens50f0}"
+    echo "NCCL and GLOO socket interfaces set."
+else
+    echo "Single node setup, skipping NCCL and GLOO socket interface settings."
+fi
+
 MODEL_SIZE="${MODEL_SIZE:-70}"
 TP="${TP:-8}"
 PP="${PP:-1}"
@@ -76,8 +82,7 @@ mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
 
-DATA_DIR="/root/.cache/data"  # change to where the dataset is stored
-
+DATA_DIR="${DATA_DIR:-/root/.cache/data}"
 DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
 TOKENIZER_MODEL=$EXPERIMENT_DIR/tokenizer.model
@@ -86,7 +91,7 @@ if ! [ -f "$TOKENIZER_MODEL" ]; then
 wget -O $TOKENIZER_MODEL https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
 fi
 
-MAX_POSITION_EMBEDDINGS=128000
+MAX_POSITION_EMBEDDINGS=4096
 
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
@@ -108,19 +113,16 @@ fi
 
 if [[ $MODEL_SIZE -eq 7 ]]; then #llama2-7B
         HIDDEN_SIZE=4096 # e.g. llama-13b: 5120
-        FFN_HIDDEN_SIZE=14336 # e.g. llama-13b: 13824
+        FFN_HIDDEN_SIZE=11008 # e.g. llama-13b: 13824
         NUM_LAYERS=32 # e.g. llama-13b: 40
         NUM_HEADS=32 # e.g. llama-13b: 40
-        SEQ_LENGTH=$SEQ_LENGTH
-        NUM_KV_HEADS=8 # llama2 70B uses GQA
+        NUM_KV_HEADS=32 # No GQA for llama2 7b.
 elif [[ $MODEL_SIZE -eq 70 ]]; then
         HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
         FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
         NUM_LAYERS=80 # e.g. llama-13b: 40
         NUM_HEADS=64 # e.g. llama-13b: 40
         NUM_KV_HEADS=8 # llama3 70B uses GQA
-        SEQ_LENGTH=$SEQ_LENGTH
-        MAX_POSITION_EMBEDDINGS=$MAX_POSITION_EMBEDDINGS
 else
         echo "Model size not supported."
         exit 1
