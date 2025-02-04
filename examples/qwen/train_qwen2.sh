@@ -13,8 +13,6 @@ export NCCL_CHECKS_DISABLE=1
 export NCCL_IB_HCA=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7 
 export NCCL_IB_GID_INDEX=3
 export NCCL_CROSS_NIC=0
-export NCCL_SOCKET_IFNAME=ens50f0np0 # network interface  
-export GLOO_SOCKET_IFNAME=ens50f0np0 # network interface
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_PROTO=Simple
 export RCCL_MSCCL_ENABLE=0
@@ -42,7 +40,6 @@ USE_FLASH_ATTN="${USE_FLASH_ATTN:-1}"
 NO_TRAINING="${NO_TRAINING:-0}" # NO_TRAINING=1: for computing metrics only
 ENABLE_PROFILING="${ENABLE_PROFILING:-0}" #enable pytorch profiling
 ENABLE_ROPE="${ENABLE_ROPE:-1}"
-DISABLE_ROPE_TE="${DISABLE_ROPE_TE:-0}"
 echo "NO_TRAINING=$NO_TRAINING"
 
 CWD=`pwd`
@@ -55,12 +52,20 @@ NNODES="${NNODES:-1}"
 NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
-MODEL_SIZE="${MODEL_SIZE:-1.5B}"
+if [ "${NNODES:-1}" -gt 1 ]; then
+    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens5}"
+    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens50f0}"
+    echo "NCCL and GLOO socket interfaces set."
+else
+    echo "Single node setup, skipping NCCL and GLOO socket interface settings."
+fi
+
+MODEL_SIZE="${MODEL_SIZE:-1.5}"
 TP="${TP:-8}"
 PP="${PP:-1}"
 CP="${CP:-1}"
 MBS="${MBS:-2}"
-GBS="${GBS:-8}"
+BS="${BS:-8}"
 SEQ_LENGTH="${SEQ_LENGTH:-2048}"
 MAX_POSITION_EMBEDDINGS="${MAX_POSITION_EMBEDDINGS:-131072}"
 TOTAL_ITERS="${TOTAL_ITERS:-10}"
@@ -75,17 +80,18 @@ RECOMPUTE_NUM_LAYERS="${RECOMPUTE_NUM_LAYERS:-8}" # only work with full recomput
 DIST_OPTIM="${DIST_OPTIM:-1}" # 0: disable distributed optimizer, 1: enable distributed optimizer
 OPTIMIZER="${OPTIMIZER:-adam}" # adam or sgd, by default adam 
 
+if [ "$TOTAL_ITERS" -lt 4 ]; then
+    echo "Must give number of iteration greater than 3 to generate peformance data. Exiting..."
+    exit 1
+fi
 
-EXPERIMENT_DIR="experiment"
-mkdir -p $EXPERIMENT_DIR
-CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
+TEMP_DIR="temp"
+mkdir -p $TEMP_DIR
+CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$TEMP_DIR/ckpts"}
 
-
-DATA_DIR=./qwen-datasets/  # change to where the dataset is stored
+DATA_DIR="${DATA_DIR:-./${TEMP_DIR}/qwen-datasets}" # change to where the dataset is stored
 DATA_PATH=${DATA_PATH:-"$DATA_DIR/wudao_qwenbpe_text_document"}
-
-
-DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}_mbs${MBS}_gbs${GBS}_seqlen${SEQ_LENGTH}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
+DEFAULT_LOG_DIR="${TEMP_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}_mbs${MBS}_gbs${BS}_seqlen${SEQ_LENGTH}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
 TRAIN_LOG="${LOG_DIR}/output_${EXP_NAME}.log"
 mkdir -p $LOG_DIR
@@ -103,51 +109,40 @@ else
   ds_works=24
 fi
 
-if [ $MODEL_SIZE = 0.5B ]; then 
+if [ $MODEL_SIZE = 0.5 ]; then
     HIDDEN_SIZE=896
     FFN_HIDDEN_SIZE=4864
     NUM_LAYERS=24
     NUM_HEADS=14
     NUM_KV_HEADS=2
-    SEQ_LENGTH=$SEQ_LENGTH
-    MAX_POSITION_EMBEDDINGS=131072
-    EXTRA_VOCAB_SIZE=293
-    TOKENIZER_MODEL=Qwen/Qwen2-0.5B
-elif [ $MODEL_SIZE = 1.5B ]; then 
+    TOKENIZER_MODEL=${TOKENIZER_MODEL:-"Qwen/Qwen2-0.5B"}
+elif [ $MODEL_SIZE = 1.5 ]; then
     HIDDEN_SIZE=1536
     FFN_HIDDEN_SIZE=8960
     NUM_LAYERS=28
     NUM_HEADS=12
     NUM_KV_HEADS=2
-    SEQ_LENGTH=$SEQ_LENGTH
-    MAX_POSITION_EMBEDDINGS=131072
-    EXTRA_VOCAB_SIZE=293
-    TOKENIZER_MODEL=Qwen/Qwen2-1.5B
-elif [ $MODEL_SIZE = 7B ]; then
+    TOKENIZER_MODEL=${TOKENIZER_MODEL:-"Qwen/Qwen2-1.5B"}
+elif [ $MODEL_SIZE = 7 ]; then
     HIDDEN_SIZE=3584
     FFN_HIDDEN_SIZE=18944
     NUM_LAYERS=28
     NUM_HEADS=28
     NUM_KV_HEADS=4
-    SEQ_LENGTH=$SEQ_LENGTH
-    MAX_POSITION_EMBEDDINGS=131072
-    EXTRA_VOCAB_SIZE=421
-    TOKENIZER_MODEL=Qwen/Qwen2-7B
-elif [ $MODEL_SIZE = 72B ]; then
+    TOKENIZER_MODEL=${TOKENIZER_MODEL:-"Qwen/Qwen2-7B"}
+elif [ $MODEL_SIZE = 72 ]; then
     HIDDEN_SIZE=8192
     FFN_HIDDEN_SIZE=29568
     NUM_LAYERS=80
     NUM_HEADS=64
     NUM_KV_HEADS=8
-    SEQ_LENGTH=$SEQ_LENGTH
-    MAX_POSITION_EMBEDDINGS=131072
-    EXTRA_VOCAB_SIZE=421
-    TOKENIZER_MODEL=Qwen/Qwen2-72B
+    TOKENIZER_MODEL=${TOKENIZER_MODEL:-"Qwen/Qwen2-72B"}
 else
-    echo "Model size not supported."
+    echo "Model size not supported. Supported sizes are 0.5, 1.5, 7, 72"
     exit 1
 fi
 
+echo "TOKENIZER_MODEL $TOKENIZER_MODEL"
 GROUP_SIZE=$(( ${NUM_HEADS} / ${NUM_KV_HEADS} ))
 NUM_GROUPS=$(( ${NUM_HEADS} / ${GROUP_SIZE} ))
 
@@ -173,7 +168,7 @@ GPT_ARGS="
     --hidden-dropout 0.0 \
     --normalization RMSNorm \
     --micro-batch-size $MBS \
-    --global-batch-size $GBS \
+    --global-batch-size $BS \
     --train-iters $TOTAL_ITERS \
     --no-async-tensor-model-parallel-allreduce \
     --bf16 \
@@ -282,10 +277,6 @@ if [ "$ENABLE_ROPE" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --position-embedding-type rope"
 fi
 
-if [ "$DISABLE_ROPE_TE" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --disable-te-fused-rope"
-fi
-
 if [ "$TE_FP8" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --transformer-impl=transformer_engine \
     --fp8-margin=0 \
@@ -298,7 +289,7 @@ EXTRA_ARGS="$EXTRA_ARGS --transformer-impl=transformer_engine \
 fi
 
 run_cmd="
-    torchrun $DISTRIBUTED_ARGS ../../pretrain_gpt.py \
+    torchrun $DISTRIBUTED_ARGS pretrain_gpt.py \
         $GPT_ARGS \
         $QWEN_ARGS \
         $DATA_ARGS \
@@ -317,14 +308,36 @@ if [ "$NO_TRAINING" -eq 0 ]; then
     eval $run_cmd
 fi
 
-echo '============================================================================================================' |& tee -a $TRAIN_LOG
-PERFORMANCE=$(grep -Eo 'throughput per GPU [^|]*' $TRAIN_LOG | sed -E 's/.*throughput per GPU \(TFLOP\/s\/GPU\): ([0-9\.]+).*/\1/' |  awk 'NR > 2 { sum += $1; count++ } END { if (count > 0) printf sum / count }')
-echo "throughput per GPU: $PERFORMANCE" |& tee -a $TRAIN_LOG
+echo 'import argparse
+import numpy as np
 
-ETPI=$(grep -Eo 'elapsed time per iteration [^|]*' $TRAIN_LOG | sed -E 's/.*elapsed time per iteration \(ms\): ([0-9\.]+).*/\1/' |  awk 'NR > 2 { sum += $1; count++ } END { if (count > 0) print sum / count }')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+                        prog="Process Log")
+    parser.add_argument("filename")
+    args = parser.parse_args()
+
+    with open(args.filename) as f:
+        lines = f.readlines()
+    lines = lines[2:-1]
+    lines = [float(a) for a in lines]
+    mean = np.mean(np.array(lines))
+    print(mean)' > mean_log_value.py
+
+# echo '============================================================================================================'
+grep -Eo 'throughput per GPU [^|]*' $TRAIN_LOG | sed -E 's/.*throughput per GPU \(TFLOP\/s\/GPU\): ([0-9\.]+).*/\1/' > ${TEMP_DIR}/tmp.txt
+PERFORMANCE=$(python3 mean_log_value.py ${TEMP_DIR}/tmp.txt)
+echo "throughput per GPU: $PERFORMANCE" |& tee -a $TRAIN_LOG
+rm ${TEMP_DIR}/tmp.txt
+
+# echo '============================================================================================================'
+grep -Eo 'elapsed time per iteration [^|]*' $TRAIN_LOG | sed -E 's/.*elapsed time per iteration \(ms\): ([0-9\.]+).*/\1/' > ${TEMP_DIR}/tmp.txt
+ETPI=$(python3 mean_log_value.py ${TEMP_DIR}/tmp.txt)
 echo "elapsed time per iteration: $ETPI" |& tee -a $TRAIN_LOG
 
-TGS=$(awk -v gbs="$GBS" -v sl="$SEQ_LENGTH" -v tpi="$ETPI" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", gbs * sl * 1000/ (tpi * ws)}')
+
+TIME_PER_ITER=$(python3 mean_log_value.py ${TEMP_DIR}/tmp.txt 2>/dev/null | awk '{printf "%.6f", $0}')
+TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", bs * sl * 1000/ (tpi * ws)}')
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
-echo '============================================================================================================' |& tee -a $TRAIN_LOG
+rm ${TEMP_DIR}/tmp.txt
 
