@@ -54,8 +54,8 @@ NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
 if [ "${NNODES:-1}" -gt 1 ]; then
-    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens5}"
-    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens50f0}"
+    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens51np0}"
+    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens51np0}"
     echo "NCCL and GLOO socket interfaces set."
 else
     echo "Single node setup, skipping NCCL and GLOO socket interface settings."
@@ -74,19 +74,32 @@ CONTI_PARAMS="${CONTI_PARAMS:-0}"
 TE_FP8="${TE_FP8:-0}"  # 0: disable FP8, 1: enable FP8
 GEMM_TUNING="${GEMM_TUNING:-1}"
 MCORE="${MCORE:-1}"
+OPTIMIZER="${OPTIMIZER:-adam}"
+FSDP="${FSDP:-1}"
+RECOMPUTE="${RECOMPUTE:-1}"
 
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
 DATA_DIR="${DATA_DIR:-/root/.cache/data}"
-TOKENIZER_MODEL=meta-llama/Llama-3.1-8B
+TOKENIZER_MODEL="${TOKENIZER_MODEL:-"$DATA_DIR/tokenizer_llama3"}"
 # Download the tokenizer model
-# if ! [ -f "$TOKENIZER_MODEL" ]; then
-# wget -O $TOKENIZER_MODEL https://huggingface.co/meta-llama/Llama-3.1-8B/blob/main/original/tokenizer.model
-# fi
+if ! [ -d "$TOKENIZER_MODEL" ]; then
+  mkdir -p $TOKENIZER_MODEL
+  export HF_TOKEN="hf_xxxx"     #set huggingface access token to be able to download tokenizer
+  wget --header="Authorization: Bearer $HF_TOKEN" -O $TOKENIZER_MODEL/special_tokens_map.json https://huggingface.co/meta-llama/Llama-3.1-8B/resolve/main/special_tokens_map.json
+  wget --header="Authorization: Bearer $HF_TOKEN" -O $TOKENIZER_MODEL/tokenizer.json https://huggingface.co/meta-llama/Llama-3.1-8B/resolve/main/tokenizer.json
+  wget --header="Authorization: Bearer $HF_TOKEN" -O $TOKENIZER_MODEL/tokenizer.model https://huggingface.co/meta-llama/Llama-3.1-8B/resolve/main/original/tokenizer.model
+  wget --header="Authorization: Bearer $HF_TOKEN" -O $TOKENIZER_MODEL/tokenizer_config.json https://huggingface.co/meta-llama/Llama-3.1-8B/resolve/main/tokenizer_config.json
 
-DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
+  echo "Tokenizer files downloaded successfully to $TOKENIZER_MODEL."
+else
+  echo "Folder $TOKENIZER_MODEL already exists. Skipping download."
+fi
+
+DATA_PATH="${DATA_PATH:-"$DATA_DIR/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document"}"
+# DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
 MAX_POSITION_EMBEDDINGS=131072
 
@@ -108,18 +121,21 @@ else
   ds_works=24
 fi
 
-if [[ $MODEL_SIZE -eq 8 ]]; then #llama2-7B
+if [[ $MODEL_SIZE -eq 8 ]]; then #llama3.1-8B
         HIDDEN_SIZE=4096 # e.g. llama-13b: 5120
         FFN_HIDDEN_SIZE=14336 # e.g. llama-13b: 13824
         NUM_LAYERS=32 # e.g. llama-13b: 40
         NUM_HEADS=32 # e.g. llama-13b: 40
         NUM_KV_HEADS=8 
+        SEQ_LENGTH=$SEQ_LENGTH
 elif [[ $MODEL_SIZE -eq 70 ]]; then
         HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
         FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
         NUM_LAYERS=80 # e.g. llama-13b: 40
         NUM_HEADS=64 # e.g. llama-13b: 40
         NUM_KV_HEADS=8 # llama3 70B uses GQA 
+        SEQ_LENGTH=$SEQ_LENGTH
+        MAX_POSITION_EMBEDDINGS=$MAX_POSITION_EMBEDDINGS
 else
         echo "Model size not supported."
         exit 1
@@ -156,7 +172,14 @@ GPT_ARGS="
     --bf16 \
     --no-masked-softmax-fusion \
     --disable-bias-linear \
+    --no-rope-fusion \
 "
+if [ "$RECOMPUTE" -eq 1 ]; then
+    GPT_ARGS="$GPT_ARGS --recompute-num-layers 80 \
+        --recompute-granularity full \
+        --recompute-method block \
+        "
+fi 
 
 TRAIN_ARGS="--lr 1e-4 \
         --min-lr 1e-5 \
@@ -164,8 +187,19 @@ TRAIN_ARGS="--lr 1e-4 \
         --lr-decay-style cosine \
         --weight-decay 1.0e-1 \
         --clip-grad 1.0 \
-        --optimizer adam \
+        --ckpt-format torch_dist \
 "
+
+
+if [ "$OPTIMIZER" == "adam" ]; then
+    TRAIN_ARGS="$TRAIN_ARGS --optimizer adam \
+        --adam-beta1 0.9 \
+        --adam-beta2 0.95 \
+        "
+else
+    TRAIN_ARGS="$TRAIN_ARGS --optimizer sgd \
+        "
+fi
 
 DATA_ARGS="
     --tokenizer-type HuggingFaceTokenizer \
@@ -177,9 +211,9 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --mock-data
+    --data-path $DATA_PATH \
 "
-#--data-path $DATA_PATH \
+# --mock-data
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \
@@ -209,10 +243,20 @@ EXTRA_ARGS="
     --no-gradient-accumulation-fusion \
     --distributed-backend nccl \
     --distributed-timeout-minutes 120 \
-    --use-distributed-optimizer \
-    --overlap-param-gather \
     --overlap-grad-reduce \
 "
+
+if [ "$FSDP" -eq 1 ]; then
+EXTRA_ARGS="$EXTRA_ARGS --use-torch-fsdp2"
+    if [ "$SEQ_PARALLEL" -eq 1 ]; then
+        echo "Warning: SEQ_PARALLEL cannot be used with FSDP."
+    fi
+else
+EXTRA_ARGS="$EXTRA_ARGS --use-distributed-optimizer --overlap-param-gather"
+    if [ "$SEQ_PARALLEL" -eq 1 ]; then
+        EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
+    fi
+fi
 
 if [ "$ENABLE_PROFILING" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --profile --use-pytorch-profiler --tensorboard-dir $LOG_DIR"
@@ -220,10 +264,6 @@ fi
 
 if [ "$USE_FLASH_ATTN" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --use-flash-attn"
-fi
-
-if [ "$SEQ_PARALLEL" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
 fi
 
 if [ "$CONTI_PARAMS" -eq 1 ]; then
@@ -305,5 +345,4 @@ TIME_PER_ITER=$(python3 mean_log_value.py tmp.txt 2>/dev/null | awk '{printf "%.
 TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", bs * sl * 1000/ (tpi * ws)}')
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
-
 

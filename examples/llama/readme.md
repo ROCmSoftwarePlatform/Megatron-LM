@@ -9,6 +9,8 @@ This guide provides the steps for setting up the environment and configuring the
 1. **Download Docker Image**  
    Download the Docker image required for training:  
    `docker pull <image_name>`
+   
+   **Note:** FSDP-v2 requires `PyTorch >= 2.4.0` with FSDP-v2 support.
 
 2. **Launch Docker Container**  
    Start the Docker container:  
@@ -26,9 +28,9 @@ TEE_OUTPUT=1 MBS=2 BS=64 TP=8 TE_FP8=0 SEQ_LENGTH=4096 bash examples/llama/train
 
 To run the training with `FSDP-v2` enabled, simply add `FSDP=1` argument, for example, use the following command:
 ```bash
-TEE_OUTPUT=1 MBS=2 BS=16 TP=1 TE_FP8=0 FSDP=1 SEQ_LENGTH=8192 bash examples/llama/train_llama2_fsdpv2.sh
+TEE_OUTPUT=1 MBS=2 BS=16 TP=1 TE_FP8=0 FSDP=1 SEQ_LENGTH=8192 bash examples/llama/train_llama2.sh
 ```
-
+**Note:** It is suggested to use `TP=1` when FSDP is enabled, for higher throughput. And FSDP-v2 is not supported with pipeline parallelism, expert parallelism, MCore's distributed optimizer, gradient accumulation fusion and fp16.
 
 ### 2.2 Multi-node Training
 To run training on multiple nodes, launch the Docker container on each node. Follow these steps:
@@ -71,30 +73,35 @@ You can use either mock data or real data for training.
   Update the `DATA_PATH` to the location where your dataset is stored:
   ```bash
   DATA_DIR="/root/.cache/data"  # Change to where your dataset is stored
-  DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence
+  DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence  
   ```
+  **Note:**
+  If using `Wikipedia-en` data for training Megatron-LM, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
+  ```bash
+  DATA_PATH=${DATA_DIR}/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document
+  ``` 
 
 ### 3.3 Tokenizer
 
 - **For Llama2 Training:**  
-  Use the `Llama2Tokenizer`.
-
-- **For Llama3 Training:**  
-  Use the `HuggingFaceTokenizer`. Set the HuggingFace model link in the `TOKENIZER_MODEL` variable:
+  Set `TOKENIZER_TYPE` to use either the `Llama2Tokenizer` or `HuggingFaceTokenizer`.
+  
+  **Note:**
+      If using `HuggingFaceTokenizer` as the tokenizer-type for Llama2 training, you need to set path to tokenizer path (not `tokenizer.model` path), for example: 
   ```bash
-  TOKENIZER_MODEL=meta-llama/Llama-3.1-8B  # For Llama3
-  ```
-
-- **Note:**
-  If using `HuggingFaceTokenizer` as the tokenizer-type for Llama2 training, you need to set path to tokenizer path (not `tokenizer.model` path), for example: 
-  ```bash
-    TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama2
+  TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama2
   ```  
 
-  Similarly, if using `Wikipedia-en` data for training Megatron-LM, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
+
+- **For Llama3 Training:**  
+  Use the `HuggingFaceTokenizer`. Set the local tokenizer path to the `TOKENIZER_MODEL` variable, if it is already downloaded:
   ```bash
-  DATA_PATH=${DATA_DIR}/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document
-  ``` 
+  TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama3  # For Llama3
+  ```
+  Otherwise, you need to set your personal HuggingFace access token `HF_TOKEN` in the script to download the tokenizer. In order to set the `HF_TOKEN` for Llama3.1 model, you first need to apply access to Llama3.1 model via this [link](https://huggingface.co/meta-llama/Llama-3.1-8B). After you are authorized, you are able to set your personal HuggingFace access token `HF_TOKEN` in your personal setting page and update the following variable in the script.
+  ```bash
+  export HF_TOKEN="hf_xxxx"
+  ```
 
 ### 3.4 Multi-node Training
 If you're running multi-node training, update the following environment variables:
