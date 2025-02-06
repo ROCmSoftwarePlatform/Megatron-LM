@@ -77,6 +77,8 @@ MCORE="${MCORE:-1}"
 OPTIMIZER="${OPTIMIZER:-adam}"
 FSDP="${FSDP:-1}"
 RECOMPUTE="${RECOMPUTE:-1}"
+ROPE_FUSION="${ROPE_FUSION:-1}" # 1: use rope-fusion, 0: no-rope-fusion
+DATA_TYPE="${DATA_TYPE:-real}" # mock: use mock data, real: use real data
 
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
@@ -172,7 +174,6 @@ GPT_ARGS="
     --bf16 \
     --no-masked-softmax-fusion \
     --disable-bias-linear \
-    --no-rope-fusion \
 "
 if [ "$RECOMPUTE" -eq 1 ]; then
     GPT_ARGS="$GPT_ARGS --recompute-num-layers 80 \
@@ -180,6 +181,10 @@ if [ "$RECOMPUTE" -eq 1 ]; then
         --recompute-method block \
         "
 fi 
+
+if [ "$ROPE_FUSION" -eq 0 ]; then
+    GPT_ARGS="$GPT_ARGS --no-rope-fusion"
+fi
 
 TRAIN_ARGS="--lr 1e-4 \
         --min-lr 1e-5 \
@@ -211,9 +216,14 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --data-path $DATA_PATH \
 "
-# --mock-data
+
+if [ "$DATA_TYPE" == "mock" ];then
+    DATA_ARGS="$DATA_ARGS --mock-data"
+else
+    DATA_ARGS="$DATA_ARGS --data-path $DATA_PATH"
+fi
+
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \
@@ -247,14 +257,22 @@ EXTRA_ARGS="
 "
 
 if [ "$FSDP" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --use-torch-fsdp2"
-    if [ "$SEQ_PARALLEL" -eq 1 ]; then
-        echo "Warning: SEQ_PARALLEL cannot be used with FSDP."
+    EXTRA_ARGS="$EXTRA_ARGS --use-torch-fsdp2"
+    if [ "$TP" -gt 1 ]; then
+        if [ "$SEQ_PARALLEL" -ne 1 ]; then
+            echo "When using tensor parallelism, sequence parallelism must be used. Enabling it automatically."
+            SEQ_PARALLEL=1
+        fi
+        echo "Warning: Sequence Parallelism and FSDP2 have conflicting CUDA_MAX_CONNECTIONS requirements. It is recommended not to use them together."
+    else
+        if [ "$SEQ_PARALLEL" -eq 1 ]; then
+            echo "TP=1 does not benefit from Sequence Parallelism and it is recommended not to use them together due to conflicting CUDA_MAX_CONNECTIONS requirements. Disabling it."
+            SEQ_PARALLEL=0
+        fi
     fi
 else
-EXTRA_ARGS="$EXTRA_ARGS --use-distributed-optimizer --overlap-param-gather"
-    if [ "$SEQ_PARALLEL" -eq 1 ]; then
-        EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
+    if [ "$OPTIMIZER" == "adam" ]; then
+        EXTRA_ARGS="$EXTRA_ARGS --use-distributed-optimizer --overlap-param-gather"
     fi
 fi
 
@@ -264,6 +282,10 @@ fi
 
 if [ "$USE_FLASH_ATTN" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --use-flash-attn"
+fi
+
+if [ "$SEQ_PARALLEL" -eq 1 ]; then
+EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
 fi
 
 if [ "$CONTI_PARAMS" -eq 1 ]; then

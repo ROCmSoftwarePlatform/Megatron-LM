@@ -63,18 +63,27 @@ export GLOO_SOCKET_IFNAME=ens50f0np0
 You can use either mock data or real data for training.
 
 - **Mock Data:**  
-  Replace the data path:
+  Mock data is applied when argument is set to be `DATA_TYPE=mock` and it will be automatically downloaded. For example, you can pass the argument to the command:
+
   ```bash
-  --data-path $DATA_PATH \ with 
-  --mock-data
+  TEE_OUTPUT=1 DATA_TYPE=mock bash examples/llama/train_llama2.sh
   ```
 
 - **Real Data:**  
-  Update the `DATA_PATH` to the location where your dataset is stored:
+  Real data is retrieved from `$DATA_PATH` when argument is set to be `DATA_TYPE=real`. Update the `DATA_PATH` to the location where your dataset is stored either in the script or through command line:
+
   ```bash
-  DATA_DIR="/root/.cache/data"  # Change to where your dataset is stored
-  DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence  
+  TEE_OUTPUT=1 DATA_DIR=path/to/your/data bash examples/llama/train_llama2.sh 
   ```
+
+  By default, `DATA_DIR` should have the following structure, where tokenizer directory also resides inside `DATA_DIR`:
+
+  ```
+  - DATA_DIR/
+    - bookcorpus_text_sentence/
+    - tokenizer_llama2/
+  ```
+
   **Note:**
   If using `Wikipedia-en` data for training Megatron-LM, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
   ```bash
@@ -82,23 +91,40 @@ You can use either mock data or real data for training.
   ``` 
 
 ### 3.3 Tokenizer
+You can assign the path of existing tokenizer to the command line argument `TOKENIZER_MODEL`, or directly modify it in the script. If tokenizer is not found, it will be downloaded to the default tokenizer model path: `${DATA_DIR}/tokenizer_llamaN` (N=2 or 3).
+
+Set tokenizer path via command line:
+
+  ```bash
+  TEE_OUTPUT=1 TOKENIZER_MODEL=path/to/your/tokenizer bash examples/llama/train_llama3.sh
+  ```
 
 - **For Llama2 Training:**  
-  Set `TOKENIZER_TYPE` to use either the `Llama2Tokenizer` or `HuggingFaceTokenizer`.
+  Set `TOKENIZER_TYPE` to use either the `Llama2Tokenizer` or `HuggingFaceTokenizer`. For example:
+  ```bash
+  TEE_OUTPUT=1 TOKENIZER_TYPE=Llama2Tokenizer DATA_DIR=path/to/your/data bash examples/llama/train_llama2.sh
+  ```
   
   **Note:**
-      If using `HuggingFaceTokenizer` as the tokenizer-type for Llama2 training, you need to set path to tokenizer path (not `tokenizer.model` path), for example: 
+      If using `HuggingFaceTokenizer` as the tokenizer-type for Llama2 training, you need to set path to tokenizer directory path (not `tokenizer.model` path), for example:
+
   ```bash
   TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama2
   ```  
 
+    If using `Llama2Tokenizer` as the tokenizer-type for Llama2 training, you need to set path to the tokenizer model path:
+
+    ```bash
+    TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama2/tokenizer.model
+    ```
 
 - **For Llama3 Training:**  
   Use the `HuggingFaceTokenizer`. Set the local tokenizer path to the `TOKENIZER_MODEL` variable, if it is already downloaded:
   ```bash
   TOKENIZER_MODEL=${DATA_DIR}/tokenizer_llama3  # For Llama3
   ```
-  Otherwise, you need to set your personal HuggingFace access token `HF_TOKEN` in the script to download the tokenizer. In order to set the `HF_TOKEN` for Llama3.1 model, you first need to apply access to Llama3.1 model via this [link](https://huggingface.co/meta-llama/Llama-3.1-8B). After you are authorized, you are able to set your personal HuggingFace access token `HF_TOKEN` in your personal setting page and update the following variable in the script.
+  Otherwise, if you do not have Llama3.1 tokenizer locally, you need to set your personal HuggingFace access token `HF_TOKEN` in the script to download the tokenizer. To set the `HF_TOKEN` for Llama3.1 model, you first need to apply access to Llama3.1 model via this [link](https://huggingface.co/meta-llama/Llama-3.1-8B). After you are authorized, you are able to set your personal HuggingFace access token `HF_TOKEN` in your personal setting page and update the following variable in the script.
+
   ```bash
   export HF_TOKEN="hf_xxxx"
   ```
