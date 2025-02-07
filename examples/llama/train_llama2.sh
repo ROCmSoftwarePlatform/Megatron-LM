@@ -89,8 +89,7 @@ CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
 
 DATA_DIR="${DATA_DIR:-/root/.cache/data}"
-DATA_PATH="${DATA_PATH:-"$DATA_DIR/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document"}"
-# DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
+DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
 TOKENIZER_MODEL="$DATA_DIR/tokenizer_llama2"
 if ! [ -d "$TOKENIZER_MODEL" ]; then
@@ -279,7 +278,8 @@ if [ "$FSDP" -eq 1 ]; then
         echo "Warning: Sequence Parallelism and FSDP2 have conflicting CUDA_MAX_CONNECTIONS requirements. It is recommended not to use them together."
     else
         if [ "$SEQ_PARALLEL" -eq 1 ]; then
-            echo "TP=1 does not benefit from Sequence Parallelism and it is recommended not to use them together due to conflicting CUDA_MAX_CONNECTIONS requirements. Disabling it."
+            echo "Warning: Sequence Parallelism and FSDP2 have conflicting CUDA_MAX_CONNECTIONS requirements. It is recommended not to use them together."
+            echo "FSDP2 and sequence parallel are on. TP=1 does not benefit from sequence parallelism. Disabling sequence parallel."
             SEQ_PARALLEL=0
         fi
     fi
