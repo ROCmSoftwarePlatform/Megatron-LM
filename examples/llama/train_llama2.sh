@@ -196,12 +196,12 @@ if [ "$ROPE_FUSION" -eq 0 ]; then
 fi
 
 TRAIN_ARGS="--lr 1e-4 \
-    --min-lr 1e-5 \
-    --lr-decay-iters 320000 \
-    --lr-decay-style cosine \
-    --weight-decay 1.0e-1 \
-    --clip-grad 1.0 \
-    --ckpt-format torch_dist \
+        --min-lr 1e-5 \
+        --lr-decay-iters 320000 \
+        --lr-decay-style cosine \
+        --weight-decay 1.0e-1 \
+        --clip-grad 1.0 \
+        --ckpt-format torch_dist \
 "
 #   --use-torch-fsdp2 requires --ckpt-format torch_dist
 
@@ -240,7 +240,7 @@ OUTPUT_ARGS="
     --save-interval 5000 \
     --log-throughput \
     --no-save-optim \
-    --eval-iters -1 
+    --eval-iters -1   
 "
 #  --save $CHECKPOINT_PATH \
 

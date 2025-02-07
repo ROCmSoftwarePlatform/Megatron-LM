@@ -100,8 +100,7 @@ else
   echo "Folder $TOKENIZER_MODEL already exists. Skipping download."
 fi
 
-DATA_PATH="${DATA_PATH:-"$DATA_DIR/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document"}"
-# DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
+DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
 
 MAX_POSITION_EMBEDDINGS=131072
 
