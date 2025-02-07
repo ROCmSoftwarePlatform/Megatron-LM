@@ -83,9 +83,15 @@ You can use either mock data or real data for training.
     - bookcorpus_text_sentence/
     - tokenizer_llama2/
   ```
+- **Downloading the dataset:**
+  Set argument `DATASET` to the dataset you would like to use. Currently, two datasets are supported `DATASET=wiki` and `DATASET=bookcorpus`. Use the following command to download the dataset:
+  ```bash
+  DATASET=wiki bash examples/llama/prepare_dataset.sh #for wiki-en dataset
+  DATASET=bookcorpus bash examples/llama/prepare_dataset.sh #for bookcorpus dataset
+  ```
 
-  **Note:**
-  If using `Wikipedia-en` data for training Megatron-LM, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
+- **Note:**
+  If using `Wikipedia-en` data for training Megatron-LM, in the training script, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
   ```bash
   DATA_PATH=${DATA_DIR}/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document
   ``` 
