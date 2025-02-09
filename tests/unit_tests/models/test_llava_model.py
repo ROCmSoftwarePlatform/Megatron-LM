@@ -396,7 +396,7 @@ class TestLLaVAModel:
         path = tmp_path / "model.pt"
         torch.save(self.model.state_dict(), path)
 
-        self.model.load_state_dict(torch.load(path))
+        self.model.load_state_dict(torch.load(path), weights_only=False)
 
     @pytest.mark.internal
     def test_freeze(self):
