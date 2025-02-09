@@ -56,6 +56,7 @@ def model_provider(pre_process=True, post_process=True) -> GPTModel:
 
     print_rank_0('building Grok-1 model ...')
     config = core_transformer_config_from_args(args)
+    config.gated_linear_unit = True
 
     build_model_context = nullcontext
     build_model_context_args = {}
