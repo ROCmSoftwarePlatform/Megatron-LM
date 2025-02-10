@@ -37,7 +37,7 @@ if [ "$DATASET" == "bookcorpus" ]; then
     echo "Downloading bookcorpus dataset to ${DATASET_PATH}..."
     python3 examples/llama/prepare_bookcorpus_megatron_dataset.py --out-dir ${DATASET_PATH}
     python3 tools/preprocess_data.py --input ${DATASET_PATH}/bookcorpus_megatron.json  --tokenizer-type GPTSentencePieceTokenizer \
-    --tokenizer-model ${TOKENIZER_MODEL} --output-prefix ${DATASET_PATH}/bookcorpus --workers `nproc` --split-sentences
+    --tokenizer-model ${TOKENIZER_MODEL} --output-prefix ${DATASET_PATH}/bookcorpus --workers `nproc` --split-sentences --partitions 2
 fi
 
 echo "Finishing data preparation!"

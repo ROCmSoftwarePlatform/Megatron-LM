@@ -90,10 +90,18 @@ You can use either mock data or real data for training.
   DATASET=bookcorpus bash examples/llama/prepare_dataset.sh #for bookcorpus dataset
   ```
 
-- **Note:**
-  If using `Wikipedia-en` data for training Megatron-LM, in the training script, you need to set data path to specific file name that is pointing to `.bin` or `.idx` file, for example:
+  Then you could launch training using the following commands:
   ```bash
-  DATA_PATH=${DATA_DIR}/wikipedia_20220301.en/wikipedia_20220301.en.train.jsonl_text_document
+  TEE_OUTPUT=1 MBS=1 BS=8 TP=8 TE_FP8=0 FSDP=1 SEQ_LENGTH=8192 TOKENIZER_TYPE=Llama2Tokenizer DATA_DIR=./tmp/data/bookcorpus bash examples/llama/train_llama2.sh #for downloaded bookcorpus dataset
+
+  TEE_OUTPUT=1 MBS=1 BS=8 TP=8 TE_FP8=0 FSDP=1 SEQ_LENGTH=8192 TOKENIZER_TYPE=Llama2Tokenizer DATA_DIR=./tmp/data/wiki DATA_PATH=./tmp/data/wiki/wikipedia_20220301.en.train.jsonl_text_document bash examples/llama/train_llama2.sh #for downloaded wikipedia dataset
+
+  ```
+
+- **Note:**
+  When training Megatron-LM, in the training script, you need to set data path to the specific file name that is pointing to `.bin` or `.idx` file, for example:
+  ```bash
+  DATA_PATH=${DATA_DIR}/wikipedia_20220301.en.train.jsonl_text_document
   ``` 
 
 ### 3.3 Tokenizer
