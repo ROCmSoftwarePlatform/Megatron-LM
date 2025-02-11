@@ -353,3 +353,4 @@ TGS=$(awk -v bs="$GBS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
 
+echo "llama MODEL Size, $MODEL_SIZE, TP, $TP, BS, $GBS, MBS, $MBS , PP , $PP, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE" >> result.csv
