@@ -63,14 +63,14 @@ export GLOO_SOCKET_IFNAME=ens50f0np0
 You can use either mock data or real data for training.
 
 - **Mock Data:**  
-  Mock data is applied when argument is set to be `DATA_TYPE=mock` and it will be automatically downloaded. For example, you can pass the argument to the command:
+  Mock data is applied when argument is set to be `MOCK_DATA=1` and it will be automatically downloaded. For example, you can pass the argument to the command:
 
   ```bash
-  TEE_OUTPUT=1 DATA_TYPE=mock bash examples/llama/train_llama2.sh
+  TEE_OUTPUT=1 MOCK_DATA=1 bash examples/llama/train_llama2.sh
   ```
 
 - **Real Data:**  
-  Real data is retrieved from `$DATA_PATH` when argument is set to be `DATA_TYPE=real`. Update the `DATA_PATH` to the location where your dataset is stored either in the script or through command line:
+  Real data is retrieved from `$DATA_PATH` when argument is set to be `MOCK_DATA=0`. Update the `DATA_PATH` to the location where your dataset is stored either in the script or through command line:
 
   ```bash
   TEE_OUTPUT=1 DATA_DIR=path/to/your/data bash examples/llama/train_llama2.sh 

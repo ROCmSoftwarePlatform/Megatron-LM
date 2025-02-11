@@ -78,10 +78,10 @@ GEMM_TUNING="${GEMM_TUNING:-1}"
 MCORE="${MCORE:-1}"
 OPTIMIZER="${OPTIMIZER:-adam}"
 FSDP="${FSDP:-1}"
-RECOMPUTE="${RECOMPUTE:-1}"
+RECOMPUTE="${RECOMPUTE:-0}"
 TOKENIZER_TYPE="${TOKENIZER_TYPE:-HuggingFaceTokenizer}"
 ROPE_FUSION="${ROPE_FUSION:-1}" # 1: use rope-fusion, 0: no-rope-fusion
-DATA_TYPE="${DATA_TYPE:-real}" # mock: use mock data, real: use real data
+MOCK_DATA="${MOCK_DATA:-0}" # 1: use mock data, 0: use real data
 
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
@@ -229,7 +229,7 @@ DATA_ARGS="
     --num-workers $ds_works \
 "
 
-if [ "$DATA_TYPE" == "mock" ];then
+if [ "$MOCK_DATA" -eq 1 ];then
     DATA_ARGS="$DATA_ARGS --mock-data"
 else
     DATA_ARGS="$DATA_ARGS --data-path $DATA_PATH"
