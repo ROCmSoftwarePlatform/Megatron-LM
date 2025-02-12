@@ -358,4 +358,4 @@ grep -o 'mem usages: [0-9.]*' $TRAIN_LOG  | awk '{print $3}' > tmp.txt
 avg_mem_usage=$(python3 mean_log_value.py tmp.txt)
 rm tmp.txt
 
-echo "qwen MODEL Size, $MODEL_SIZE, TP, $TP, BS, $GBS, MBS, $MBS , PP , $PP, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE, avg_mem_usage, $avg_mem_usage" >> result.csv
+echo "qwen MODEL Size, $MODEL_SIZE, TP, $TP, BS, $GBS, MBS, $MBS , PP , $PP, SEQ_LENGTH, $SEQ_LENGTH, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE, avg_mem_usage, $avg_mem_usage" >> result.csv
