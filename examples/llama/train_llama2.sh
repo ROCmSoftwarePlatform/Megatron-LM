@@ -39,8 +39,6 @@ TEE_OUTPUT="${TEE_OUTPUT:-1}"
 USE_FLASH_ATTN="${USE_FLASH_ATTN:-1}"
 NO_TRAINING="${NO_TRAINING:-0}" # NO_TRAINING=1: for computing metrics only
 ENABLE_PROFILING="${ENABLE_PROFILING:-0}" #enable pytorch profiling
-ENABLE_ROPE="${ENABLE_ROPE:-1}"
-DISABLE_ROPE_TE="${DISABLE_ROPE_TE:-0}"
 echo "NO_TRAINING=$NO_TRAINING"
 
 CWD=`pwd`
@@ -188,7 +186,6 @@ GPT_ARGS="
     --no-async-tensor-model-parallel-allreduce \
     --bf16 \
     --no-masked-softmax-fusion \
-    --disable-bias-linear \
 "
 if [ "$RECOMPUTE" -eq 1 ]; then
     GPT_ARGS="$GPT_ARGS --recompute-num-layers 80 \
@@ -305,14 +302,6 @@ fi
 
 if [ "$MCORE" -eq 1 ]; then
 EXTRA_ARGS="$EXTRA_ARGS --use-mcore-models"
-fi
-
-if [ "$ENABLE_ROPE" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --position-embedding-type rope"
-fi
-
-if [ "$DISABLE_ROPE_TE" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --disable-te-fused-rope"
 fi
 
 if [ "$TE_FP8" -eq 1 ]; then
