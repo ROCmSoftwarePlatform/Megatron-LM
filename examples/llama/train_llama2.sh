@@ -83,6 +83,12 @@ TOKENIZER_TYPE="${TOKENIZER_TYPE:-HuggingFaceTokenizer}"
 ROPE_FUSION="${ROPE_FUSION:-1}" # 1: use rope-fusion, 0: no-rope-fusion
 MOCK_DATA="${MOCK_DATA:-0}" # 1: use mock data, 0: use real data
 
+if [ "$FSDP" -eq 1 ] && [ "$TP" -gt 1 ]; then
+    echo "It is not recommended to use FSDP and TP together. Disabling TP."
+    TP=1
+    echo "Resetting TP=$TP"
+fi
+
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
@@ -270,18 +276,10 @@ EXTRA_ARGS="
 
 if [ "$FSDP" -eq 1 ]; then
     EXTRA_ARGS="$EXTRA_ARGS --use-torch-fsdp2"
-    if [ "$TP" -gt 1 ]; then
-        if [ "$SEQ_PARALLEL" -ne 1 ]; then
-            echo "When using tensor parallelism, sequence parallelism must be used. Enabling it automatically."
-            SEQ_PARALLEL=1
-        fi
+    if [ "$SEQ_PARALLEL" -eq 1 ]; then
         echo "Warning: Sequence Parallelism and FSDP2 have conflicting CUDA_MAX_CONNECTIONS requirements. It is recommended not to use them together."
-    else
-        if [ "$SEQ_PARALLEL" -eq 1 ]; then
-            echo "Warning: Sequence Parallelism and FSDP2 have conflicting CUDA_MAX_CONNECTIONS requirements. It is recommended not to use them together."
-            echo "FSDP2 and sequence parallel are on. TP=1 does not benefit from sequence parallelism. Disabling sequence parallel."
-            SEQ_PARALLEL=0
-        fi
+        echo "FSDP2 and sequence parallel are on. Disabling sequence parallel."
+        SEQ_PARALLEL=0
     fi
 else
     if [ "$OPTIMIZER" == "adam" ]; then
