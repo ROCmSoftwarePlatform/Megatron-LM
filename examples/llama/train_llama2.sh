@@ -307,3 +307,9 @@ TIME_PER_ITER=$(python3 mean_log_value.py tmp.txt 2>/dev/null | awk '{printf "%.
 TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", bs * sl * 1000/ (tpi * ws)}')
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
+
+grep -o 'mem usages: [0-9.]*' $TRAIN_LOG  | awk '{print $3}' > tmp.txt
+avg_mem_usage=$(python3 mean_log_value.py tmp.txt)
+rm tmp.txt
+echo "llama MODEL Size, $MODEL_SIZE, TP, $TP, BS, $BS, MBS, $MBS , PP , $PP, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE, avg_mem_usage, $avg_mem_usage" >> result.csv
+

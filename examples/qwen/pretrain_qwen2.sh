@@ -353,4 +353,9 @@ TGS=$(awk -v bs="$GBS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
 
-echo "llama MODEL Size, $MODEL_SIZE, TP, $TP, BS, $GBS, MBS, $MBS , PP , $PP, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE" >> result.csv
+
+grep -o 'mem usages: [0-9.]*' $TRAIN_LOG  | awk '{print $3}' > tmp.txt
+avg_mem_usage=$(python3 mean_log_value.py tmp.txt)
+rm tmp.txt
+
+echo "qwen MODEL Size, $MODEL_SIZE, TP, $TP, BS, $GBS, MBS, $MBS , PP , $PP, ITERS, $TOTAL_ITERS, TGS, $TGS, throughput, $PERFORMANCE, avg_mem_usage, $avg_mem_usage" >> result.csv
