@@ -10,7 +10,7 @@ This guide provides the steps for setting up the environment and configuring the
    Download the Docker image required for training:  
    `docker pull <image_name>`
    
-   **Note:** FSDP-v2 requires `PyTorch >= 2.4.0` with FSDP-v2 support.
+   **Note:** It is recommended to have `PyTorch >= 2.5.0` for full support of FSDP-v2.
 
 2. **Launch Docker Container**  
    Start the Docker container:  
