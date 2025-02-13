@@ -34,9 +34,9 @@ export GLOO_SOCKET_IFNAME=ens50f0np0
 You can use either mock data or real data for training.
 
 - **Mock Data:**
-  Replace the data path:
+  Use `MOCK_DATA` variable to toggle between mock and real data. Default value is 1. 
   ```bash
-  Set MOCK_DATA=1 
+  MOCK_DATA=1 
   ```
 - **Real Data:**
   Update the `DATA_PATH` to the location where your dataset is stored:
@@ -79,10 +79,13 @@ If you're running multi-node training, update the following environment variable
   ```
 
 - **DATA_CACHE_PATH:**
-  Set `DATA_CACHE_PATH` to a common directory accessible by all the nodes (for eg, an NFS directory)
+  Set `DATA_CACHE_PATH` to a common directory accessible by all the nodes (for eg, an NFS directory) for multi-node runs
+  ```bash
+  DATA_CACHE_PATH=/root/cache #Set to a common directory for multi-node runs
+  ```
 
- - **Network Drivers Inside Docker**
-   For multi-node runs, make sure correct drivers are installed on your nodes. If inside a docker, either install the drivers inside the docker container or pass the network drivers from the host while creating docker container
+ - **Network Drivers Inside Docker:** 
+   For multi-node runs, make sure correct network drivers are installed on the nodes. If inside a docker, either install the drivers inside the docker container or pass the network drivers from the host while creating docker container.
 
 
 ## 3. How to Run
@@ -130,7 +133,7 @@ To run training on multiple nodes, launch the Docker container on each node. Exa
 - **TOTAL_ITERS:**  
   Set the total number of iterations (default: 10).
 
-- **MOCK_DATA:**
+- **MOCK_DATA:** 
   Use MOCK_DATA if set to 1, otherwise use the real data provided by user (DEFAULT: 1)
 
 --- 
