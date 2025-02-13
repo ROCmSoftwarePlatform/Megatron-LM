@@ -386,10 +386,6 @@ def validate_args(args, defaults={}):
                 'pipeline-model-parallel size should be greater than 2 to avoid having multiple '\
                 'p2p sends and recvs between same 2 ranks per communication batch'
         
-        assert args.pipeline_model_parallel_size > 2, \
-            'pipeline-model-parallel size should be greater than 2 with ' \
-            'interleaved schedule'
-        
         assert args.num_layers is not None
         # Double check divisibility check here since check above is if guarded.
         assert args.num_layers % args.transformer_pipeline_model_parallel_size == 0, \
@@ -863,9 +859,6 @@ def core_transformer_config_from_args(args, config_class=None):
 
     if len(args.cp_comm_type) == 1:
         kw_args['cp_comm_type'] = args.cp_comm_type[0]
-    
-    if args.disable_te_fused_rope:
-        kw_args['disable_te_fused_rope'] = args.disable_te_fused_rope
         
     kw_args["cross_entropy_loss_fusion"] = args.cross_entropy_loss_fusion
     # Return config.
@@ -1030,8 +1023,6 @@ def _add_network_size_args(parser):
                        action='store_false',
                        help='Disable position embedding. Deprecated: use --position-embedding-type',
                        dest='add_position_embedding')
-    group.add_argument('--disable-te-fused-rope', action='store_true', default = False,
-                       help='Disable fused rope from transformer-engine: use --disable_te_fused_rope')
     group.add_argument('--make-vocab-size-divisible-by', type=int, default=128,
                        help='Pad the vocab size to be divisible by this value.'
                        'This is added for computational efficieny reasons.')
