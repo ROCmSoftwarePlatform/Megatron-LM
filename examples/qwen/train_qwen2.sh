@@ -341,3 +341,17 @@ TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm ${TEMP_DIR}/tmp.txt
 
+grep -o 'mem usages: [0-9.]*' $TRAIN_LOG  | awk '{print $3}' > ${TEMP_DIR}/tmp.txt
+avg_mem_usage=$(python3 mean_log_value.py ${TEMP_DIR}/tmp.txt)
+rm ${TEMP_DIR}/tmp.txt
+
+TORCH_VERSION=$(python3 -c "import torch; print(torch.__version__)" 2>/dev/null || echo "Not Installed")
+# Get Transformer Engine version
+TE_VERSION=$(python3 -c "import transformer_engine; print(transformer_engine.__version__)" 2>/dev/null || echo "Not Installed")
+# Get Flash Attention version
+FA_VERSION=$(python3 -c "import flash_attn; print(flash_attn.__version__)" 2>/dev/null || echo "Not Installed")
+
+echo "Transformer Engine Version: $TE_VERSION"
+echo "Flash Attention Version: $FA_VERSION"
+
+echo "qwen MODEL Size, $MODEL_SIZE, TP, $TP, BS, $BS, MBS, $MBS , PP , $PP, SEQ_LENGTH, $SEQ_LENGTH, ITERS, $TOTAL_ITERS, "TORCH", $TORCH_VERSION,TE_VERSION, $TE_VERSION,"FA_VERSION",$FA_VERSION,TGS, $TGS, throughput, $PERFORMANCE, avg_mem_usage, $avg_mem_usage" >> result.csv
