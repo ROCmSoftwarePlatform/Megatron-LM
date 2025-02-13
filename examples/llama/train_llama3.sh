@@ -54,8 +54,8 @@ NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
 if [ "${NNODES:-1}" -gt 1 ]; then
-    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens5}"
-    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens50f0}"
+    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-ens51np0}"
+    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-ens51np0}"
     echo "NCCL and GLOO socket interfaces set."
 else
     echo "Single node setup, skipping NCCL and GLOO socket interface settings."
@@ -74,6 +74,7 @@ CONTI_PARAMS="${CONTI_PARAMS:-0}"
 TE_FP8="${TE_FP8:-0}"  # 0: disable FP8, 1: enable FP8
 GEMM_TUNING="${GEMM_TUNING:-1}"
 MCORE="${MCORE:-1}"
+MOCK_DATA="${MOCK_DATA:-1}"
 
 EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
@@ -87,7 +88,6 @@ TOKENIZER_MODEL=meta-llama/Llama-3.1-8B
 # fi
 
 DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
-
 MAX_POSITION_EMBEDDINGS=131072
 
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
@@ -177,9 +177,19 @@ DATA_ARGS="
     --eval-interval 320000 \
     --eval-iters 10 \
     --num-workers $ds_works \
-    --mock-data
 "
-#--data-path $DATA_PATH \
+
+# For multi-node runs DATA_CACHE_PATH should point to a common path accessible by all the nodes (for eg, an NFS directory)
+DATA_CACHE_PATH="/root/cache"
+
+if [ "$MOCK_DATA" -eq 1 ]; then
+    echo Using mock data.
+    DATA_ARGS="$DATA_ARGS --mock-data --data-cache-path ${DATA_CACHE_PATH}"
+else
+    echo Using data from $DATA_PATH
+    DATA_ARGS="$DATA_ARGS --data-path $DATA_PATH --data-cache-path ${DATA_CACHE_PATH}"
+fi
+
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 5000 \
@@ -306,4 +316,8 @@ TGS=$(awk -v bs="$BS" -v sl="$SEQ_LENGTH" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_
 echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
 
-
+# Extract memory usage
+grep -Eo 'mem usages: [^|]*' "$TRAIN_LOG" | sed -E 's/.*mem usages: ([0-9\.]+).*/\1/' > tmp.txt
+MEMUSAGE=$(python3 mean_log_value.py tmp.txt)
+echo "mem usages: $MEMUSAGE" |& tee -a "$TRAIN_LOG"
+rm tmp.txt
