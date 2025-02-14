@@ -12,7 +12,7 @@ This guide provides the steps for setting up the environment and configuring the
 
 2. **Launch Docker Container**  
    Start the Docker container:  
-   `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env_vidgoyal <image_name>`
+   `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env <image_name>`
 
 3. **Prepare training datasets**
    If you already have the preprocessed data, you can skip this section.
@@ -69,7 +69,7 @@ You can use either mock data or real data for training.
   Use the `Llama2Tokenizer`.
 
 - **For Llama3 Training:**
-  Use the `HuggingFaceTokenizer`. Set the HuggingFace model link in the `TOKENIZER_MODEL` variable:
+  Use the `HuggingFaceTokenizer`. Set the HuggingFace model path in the `TOKENIZER_MODEL` variable:
   ```bash
   TOKENIZER_MODEL=meta-llama/Llama-3.1-8B  # For Llama3
   ```

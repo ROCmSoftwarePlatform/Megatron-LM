@@ -1,4 +1,5 @@
 # Deepseek-v2 Megatron Training
+This guide provides the steps for setting up the environment and configuring the script to train deepseek-v2-lite model.
 
 ## 1. Docker Setup
 
@@ -8,7 +9,7 @@
 
 2. **Launch Docker Container**  
    Start the Docker container:  
-   `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env_vidgoyal <docker_image>`
+   `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env <docker_image>`
 
 ## 2. Prepare Dataset
 Skip this step, if you already have the dataset. 
