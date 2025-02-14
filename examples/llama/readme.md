@@ -30,8 +30,6 @@ This guide provides the steps for setting up the environment and configuring the
   ```
   In this case, the automatically generated output files are named `my-gpt2_text_document.bin` and `my-gpt2_text_document.idx`.
 
-  Please refer to `examples/llama/prepare_dataset.sh` as an example to download and prepare bookcorpus datatset.
-
 ---
 
 ## 2. Configurations in Script (`Megatron-LM/examples/llama`)
