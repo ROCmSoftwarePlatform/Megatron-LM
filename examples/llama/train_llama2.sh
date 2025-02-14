@@ -80,9 +80,7 @@ EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
-
-DATA_DIR="${DATA_DIR:-/root/.cache/data}"
-DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
+DATA_PATH=${DATA_PATH:-"/data/bookcorpus_text_sentence"}
 
 TOKENIZER_MODEL=$EXPERIMENT_DIR/tokenizer.model
 # Download the tokenizer model

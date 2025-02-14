@@ -17,11 +17,11 @@ This guide provides the steps for setting up the environment and configuring the
 3. **Prepare training datasets**
    If you already have the preprocessed data, you can skip this section.
    
-   Use the following command to process datasets. We use GPT data as an example. You may change the merge table, use an end-of-document token, remove sentence splitting, and use the tokenizer type.
+   Use the following command to preprocess datasets. We use GPT data as an example. You may change the merge table, use an end-of-document token, remove sentence splitting, and use the tokenizer type.
 
   ```bash
   python tools/preprocess_data.py \
-    --input my-corpus.json \
+    --input your-corpus.json \
     --output-prefix my-gpt2 \
     --vocab-file gpt2-vocab.json \
     --tokenizer-type GPT2BPETokenizer \
@@ -29,6 +29,8 @@ This guide provides the steps for setting up the environment and configuring the
     --append-eod
   ```
   In this case, the automatically generated output files are named `my-gpt2_text_document.bin` and `my-gpt2_text_document.idx`.
+
+  Please refer to `examples/llama/prepare_dataset.sh` as an example to download and prepare bookcorpus datatset.
 
 ---
 
@@ -59,8 +61,7 @@ You can use either mock data or real data for training.
   Update the `DATA_PATH` to the location where your dataset is stored:
   ```bash
   MOCK_DATA=0
-  DATA_DIR="/root/.cache/data"  # Change to where your dataset is stored
-  DATA_PATH=${DATA_DIR}/bookcorpus_text_sentence
+  DATA_PATH=${DATA_PATH:-"/data/bookcorpus_text_sentence"} # Change to where your dataset is stored
   ```
 
 ### 2.3 Tokenizer

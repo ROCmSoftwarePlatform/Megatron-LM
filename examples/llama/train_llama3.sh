@@ -80,14 +80,13 @@ EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
-DATA_DIR="${DATA_DIR:-/root/.cache/data}"
 TOKENIZER_MODEL=meta-llama/Llama-3.1-8B
 # Download the tokenizer model
 # if ! [ -f "$TOKENIZER_MODEL" ]; then
 # wget -O $TOKENIZER_MODEL https://huggingface.co/meta-llama/Llama-3.1-8B/blob/main/original/tokenizer.model
 # fi
 
-DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
+DATA_PATH=${DATA_PATH:-"/data/bookcorpus_text_sentence"}
 MAX_POSITION_EMBEDDINGS=131072
 
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
