@@ -48,10 +48,8 @@ GPUS_PER_NODE=`python3 -c "import torch; print(torch.cuda.device_count())"`
 
 # single node config, Change for multinode config
 MASTER_ADDR="${MASTER_ADDR:-localhost}"
-#MASTER_ADDR="${MASTER_ADDR:-tw015}"
 MASTER_PORT="${MASTER_PORT:-6020}"
 NNODES="${NNODES:-1}"
-#NNODES="${NNODES:-2}"
 NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 

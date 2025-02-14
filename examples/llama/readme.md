@@ -12,11 +12,28 @@ This guide provides the steps for setting up the environment and configuring the
 
 2. **Launch Docker Container**  
    Start the Docker container:  
-   `docker run -it <additional flags> <image_name>`
+   `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env_vidgoyal <image_name>`
+
+3. **Prepare training datasets**
+   If you already have the preprocessed data, you can skip this section.
+   
+   Use the following command to process datasets. We use GPT data as an example. You may change the merge table, use an end-of-document token, remove sentence splitting, and use the tokenizer type.
+
+  ```bash
+  python tools/preprocess_data.py \
+    --input my-corpus.json \
+    --output-prefix my-gpt2 \
+    --vocab-file gpt2-vocab.json \
+    --tokenizer-type GPT2BPETokenizer \
+    --merge-file gpt2-merges.txt \
+    --append-eod
+  ```
+  In this case, the automatically generated output files are named `my-gpt2_text_document.bin` and `my-gpt2_text_document.idx`.
 
 ---
 
-## 2. Configurations in Script (`Megatron/examples/llama`)
+## 2. Configurations in Script (`Megatron-LM/examples/llama`)
+Use `train_llama3.sh` for Llama3/3.1 models and `train_llama2.sh` for Llama2 models.
 
 ### 2.1 Network Interface
 Update the network interface in the script to match your system’s network interface.
@@ -34,9 +51,9 @@ export GLOO_SOCKET_IFNAME=ens50f0np0
 You can use either mock data or real data for training.
 
 - **Mock Data:**
-  Replace the data path:
+  Use `MOCK_DATA` variable to toggle between mock and real data. Default value is 1. 
   ```bash
-  Set MOCK_DATA=1 
+  MOCK_DATA=1 
   ```
 - **Real Data:**
   Update the `DATA_PATH` to the location where your dataset is stored:
@@ -58,7 +75,7 @@ You can use either mock data or real data for training.
   ```
 
 ### 2.4 Multi-node Training
-If you're running multi-node training, update the following environment variables on each node:
+If you're running multi-node training, update the following environment variables on each node.They can also be passed as command line arguments.
 
 - **Master Address:**
   Change `localhost` to the master node's hostname:
@@ -79,10 +96,13 @@ If you're running multi-node training, update the following environment variable
   ```
 
 - **DATA_CACHE_PATH:**
-  Set `DATA_CACHE_PATH` to a common directory accessible by all the nodes (for eg, an NFS directory)
+  Set `DATA_CACHE_PATH` to a common directory accessible by all the nodes (for eg, an NFS directory) for multi-node runs
+  ```bash
+  DATA_CACHE_PATH=/root/cache #Set to a common directory for multi-node runs
+  ```
 
- - **Network Drivers Inside Docker**
-   For multi-node runs, make sure correct drivers are installed on your nodes. If inside a docker, either install the drivers inside the docker container or pass the network drivers from the host while creating docker container
+ - **Network Drivers Inside Docker:** 
+   For multi-node runs, make sure correct network drivers are installed on the nodes. If inside a docker, either install the drivers inside the docker container or pass the network drivers from the host while creating docker container.
 
 
 ## 3. How to Run
@@ -132,6 +152,18 @@ To run training on multiple nodes, launch the Docker container on each node. Exa
 
 - **MOCK_DATA:**
   Use MOCK_DATA if set to 1, otherwise use the real data provided by user (DEFAULT: 1)
+
+- **MBS:**
+  Micro batch size
+
+- **BS:**
+  Global Batch size
+
+- **TP:**
+  Tensor parallel (1, 2, 4, 8)
+
+- **SEQ_LENGTH**:
+  Sequence Length
 
 --- 
 
