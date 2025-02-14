@@ -860,7 +860,6 @@ def core_transformer_config_from_args(args, config_class=None):
     if len(args.cp_comm_type) == 1:
         kw_args['cp_comm_type'] = args.cp_comm_type[0]
         
-    kw_args["cross_entropy_loss_fusion"] = args.cross_entropy_loss_fusion
     # Return config.
     return config_class(**kw_args)
 
