@@ -11,4 +11,4 @@ if __name__ == "__main__":
     out_dir.mkdir(exist_ok=True, parents=True)
 
     dataset = load_dataset("bookcorpus", split="train", trust_remote_code=True)
-    dataset.to_json(out_dir / "bookcorpus_megatron.json")
+    dataset.to_json(out_dir / "data.jsonl")
