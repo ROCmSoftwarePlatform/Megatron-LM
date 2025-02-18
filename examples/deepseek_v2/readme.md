@@ -63,7 +63,7 @@ GEMM_TUNING=1 PR=bf16 MBS=4 AC=none bash examples/deepseek_v2/train_deepseekv2.s
   `1` to enable GEMM tuning, which boosts performance by using the best GEMM kernels.
 
 - **TRAIN_ITERS:**  
-  Set the total number of iterations (default: 10).
+  Set the total number of iterations.
 
 - **MOCK_DATA:** 
   Use MOCK_DATA if set to 1, otherwise use the real data provided by user (DEFAULT: 1)
