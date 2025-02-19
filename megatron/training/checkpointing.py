@@ -704,6 +704,39 @@ def fix_query_key_value_ordering(model, checkpoint_version):
                      " checkpoint version {}".format(checkpoint_version))
 
 
+def fix_fc1_grouped_deinterleave(model, N_GPUS, checkpoint_name):
+    """Deinterleave MLP.linear_fc1 tensor chunks if loading distributed checkpoint"""
+    if isinstance(model, list):
+        assert len(model) == 1
+        model = model[0]
+
+    # Determine ckpt rank
+    distckpt_files = [f for f in os.listdir(checkpoint_name) if f.endswith("distcp")]
+    checkpoint_rank = len(distckpt_files)
+    N_groups = max(N_GPUS,checkpoint_rank)
+
+    def grouped_deinterleave_tensor(fc1_weights, N_groups):
+        fc1_weights = fc1_weights.view(N_groups, -1, fc1_weights.shape[1])
+        group_size = fc1_weights.shape[0] // N_GPUS
+        result = []
+
+        for i in range(N_GPUS):
+            group = fc1_weights[i * group_size:(i + 1) * group_size]
+            mid = group.shape[0] // 2
+            reordered = torch.empty_like(group)
+            reordered[::2] = group[:mid]
+            reordered[1::2] = group[mid:]
+            result.append(reordered)
+
+        return torch.cat(result, dim=0).view(-1, 1024)
+
+    for name, param in model.named_parameters():
+        if any(name.endswith(f'decoder.layers.{i}.mlp.linear_fc1.weight') for i in range(24)):
+            fixed_param = grouped_deinterleave_tensor(param.data, N_groups)
+            param.data.copy_(fixed_param)
+
+    print_rank_0("Successfully applied grouped deinterleave tensor transformation.")
+
 def _get_non_persistent_iteration(non_persistent_global_dir, args, checkpointing_context=None):
     if args.non_persistent_ckpt_type is None:
         return -1
@@ -1225,6 +1258,15 @@ def load_checkpoint(model, optimizer, opt_param_scheduler, load_arg='load', stri
     checkpoint_version = get_checkpoint_version()
     print_rank_0(f' checkpoint version {checkpoint_version}')
     fix_query_key_value_ordering(model, checkpoint_version)
+
+    # fix mlp fc1 layer shard ordering
+    # The same logic may apply when loading non distributed ckpt with FSDP, need to test.
+    is_dist_ckpt = (
+            ckpt_type == CheckpointType.LOCAL
+            or dist_checkpointing.check_is_distributed_checkpoint(checkpoint_name)
+        )
+    if is_dist_ckpt:
+        fix_fc1_grouped_deinterleave(model, args.data_parallel_size, checkpoint_name)
 
     # Optimizer.
     if not release and not args.finetune and not args.no_load_optim:
