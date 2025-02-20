@@ -109,7 +109,7 @@ MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 NNODES=1
 NODE_RANK=0
 GPUS_PER_NODE=8
-
+WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 elif [ $ENV = dlc ]; then
 
 NNODES=${WORLD_SIZE}
@@ -302,13 +302,21 @@ current_time=$(date "+%Y.%m.%d-%H.%M.%S")
 TENSORBOARD_DIR="${OUTPUT_BASEPATH}/tensorboard/${NAME}_${current_time}"
 mkdir -p ${TENSORBOARD_DIR}
 
+SAVE="${SAVE:-0}"
+
+if [ "$SAVE" -eq 1 ]; then
+    SAVED_PRETRAIN_CHECKPOINT_PATH="${OUTPUT_BASEPATH}/checkpoint/${NAME}"
+    save_args="--save ${SAVED_PRETRAIN_CHECKPOINT_PATH}"
+else
+    save_args=""
+fi
+
 SAVED_PRETRAIN_CHECKPOINT_PATH="${OUTPUT_BASEPATH}/checkpoint/${NAME}"
 
 megatron_options="  \
 	--log-throughput \
 	--no-gradient-accumulation-fusion \
 	--no-async-tensor-model-parallel-allreduce \
-        --save ${SAVED_PRETRAIN_CHECKPOINT_PATH} \
         --lr ${LR} \
         --min-lr ${MIN_LR} \
         --lr-decay-style cosine \
@@ -370,13 +378,11 @@ megatron_options="  \
         --eod-mask-loss
         "
 
-
-
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
 
 run_cmd="torchrun $DISTRIBUTED_ARGS examples/deepseek_v2/pretrain_deepseek.py 
  ${megatron_options} ${data_args} ${pr_options} ${activation_checkpoint_options} \
- ${do_options} ${sp_options} ${moe_options} ${offload_option} ${sft_option} ${vp_options} ${flash_options}"
+ ${do_options} ${sp_options} ${moe_options} ${offload_option} ${sft_option} ${vp_options} ${flash_options} ${save_args}"
 
 run_cmd="$run_cmd | tee $TRAIN_LOG"
 echo ${run_cmd}
@@ -399,14 +405,11 @@ if __name__ == "__main__":
     mean = np.mean(np.array(lines))
     print(mean)' > mean_log_value.py
 
-
-echo '============================================================================================================'
-grep -Eo 'throughput per GPU [^|]*' $TRAIN_LOG | sed -E 's/.*throughput per GPU \(TFLOP\/s\/GPU\): ([0-9\.]+).*/\1/' > tmp.txt
-echo "throughput per GPU: $(python mean_log_value.py tmp.txt)" |& tee -a $TRAIN_LOG
-THROUGHPUT=$(python mean_log_value.py tmp.txt)
-rm tmp.txt
-
 echo '============================================================================================================'
 grep -Eo 'elapsed time per iteration [^|]*' $TRAIN_LOG | sed -E 's/.*elapsed time per iteration \(ms\): ([0-9\.]+).*/\1/' > tmp.txt
 echo "elapsed time per iteration: $(python mean_log_value.py tmp.txt)" |& tee -a $TRAIN_LOG
+
+TIME_PER_ITER=$(python3 mean_log_value.py tmp.txt 2>/dev/null | awk '{printf "%.6f", $0}')
+TGS=$(awk -v bs="$GLOBAL_BATCH_SIZE" -v sl="$SEQ_LEN" -v tpi="$TIME_PER_ITER" -v ws="$WORLD_SIZE" 'BEGIN {printf "%.6f", bs * sl * 1000/ (tpi * ws)}')
+echo "tokens/GPU/s: $TGS" |& tee -a $TRAIN_LOG
 rm tmp.txt
