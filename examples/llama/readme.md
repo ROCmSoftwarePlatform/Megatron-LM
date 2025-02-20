@@ -14,22 +14,6 @@ This guide provides the steps for setting up the environment and configuring the
    Start the Docker container:  
    `docker run -it --device /dev/dri --device /dev/kfd --network host --ipc host --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME:$HOME -v  $HOME/.ssh:/root/.ssh --shm-size 64G --name megatron_training_env <image_name>`
 
-3. **Prepare training datasets**
-   If you already have the preprocessed data, you can skip this section.
-   
-   Use the following command to preprocess datasets. We use GPT data as an example. You may change the merge table, use an end-of-document token, remove sentence splitting, and use the tokenizer type.
-
-  ```bash
-  python tools/preprocess_data.py \
-    --input your-corpus.json \
-    --output-prefix my-gpt2 \
-    --vocab-file gpt2-vocab.json \
-    --tokenizer-type GPT2BPETokenizer \
-    --merge-file gpt2-merges.txt \
-    --append-eod
-  ```
-  In this case, the automatically generated output files are named `my-gpt2_text_document.bin` and `my-gpt2_text_document.idx`.
-
 ---
 
 ## 2. Configurations in Script (`Megatron-LM/examples/llama`)
