@@ -6,7 +6,7 @@
 #################################################################################
 # set -x
 
-# set envs 
+# set envs
 export GPU_MAX_HW_QUEUES=2
 export TORCH_NCCL_HIGH_PRIORITY=1
 export NCCL_CHECKS_DISABLE=1
@@ -18,19 +18,6 @@ export NCCL_PROTO=Simple
 export RCCL_MSCCL_ENABLE=0
 export TOKENIZERS_PARALLELISM=false
 export HSA_NO_SCRATCH_RECLAIM=1
-
-
-# parsing input arguments
-for ARGUMENT in "$@"
-do
-   KEY=$(echo $ARGUMENT | cut -f1 -d=)
-
-   KEY_LENGTH=${#KEY}
-   VALUE="${ARGUMENT:$KEY_LENGTH+1}"
-
-   export "$KEY"="$VALUE"
-done
-
 
 TIME_STAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 EXP_NAME="${EXP_NAME:-perf}"
@@ -46,10 +33,8 @@ GPUS_PER_NODE=`python3 -c "import torch; print(torch.cuda.device_count())"`
 
 # single node config, Change for multinode config
 MASTER_ADDR="${MASTER_ADDR:-localhost}"
-#MASTER_ADDR="${MASTER_ADDR:-tw015}"
 MASTER_PORT="${MASTER_PORT:-6020}"
 NNODES="${NNODES:-1}"
-#NNODES="${NNODES:-2}"
 NODE_RANK="${NODE_RANK:-0}"
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
@@ -68,6 +53,7 @@ CP="${CP:-1}"
 MBS="${MBS:-2}"
 BS="${BS:-8}"
 SEQ_LENGTH="${SEQ_LENGTH:-4096}"
+MAX_POSITION_EMBEDDINGS=32000
 TOTAL_ITERS="${TOTAL_ITERS:-5}"
 SEQ_PARALLEL="${SEQ_PARALLEL:-1}" 
 CONTI_PARAMS="${CONTI_PARAMS:-0}"
@@ -78,8 +64,8 @@ OPTIMIZER="${OPTIMIZER:-adam}"
 FSDP="${FSDP:-1}"
 RECOMPUTE="${RECOMPUTE:-0}"
 TOKENIZER_TYPE="${TOKENIZER_TYPE:-HuggingFaceTokenizer}"
+TOKENIZER_MODEL="${TOKENIZER_MODEL:-NousResearch/Llama-2-7b-chat-hf}"
 ROPE_FUSION="${ROPE_FUSION:-1}" # 1: use rope-fusion, 0: no-rope-fusion
-MOCK_DATA="${MOCK_DATA:-0}" # 1: use mock data, 0: use real data
 
 if [ "$FSDP" -eq 1 ] && [ "$TP" -gt 1 ]; then
     echo "It is not recommended to use FSDP and TP together. Disabling TP."
@@ -91,69 +77,39 @@ EXPERIMENT_DIR="experiment"
 mkdir -p $EXPERIMENT_DIR
 CHECKPOINT_PATH=${CHECKPOINT_PATH:-"$EXPERIMENT_DIR/ckpts"}
 
-
-DATA_DIR="${DATA_DIR:-/root/.cache/data}"
-DATA_PATH=${DATA_PATH:-"$DATA_DIR/bookcorpus_text_sentence"}
-
-TOKENIZER_MODEL="$DATA_DIR/tokenizer_llama2"
-if ! [ -d "$TOKENIZER_MODEL" ]; then
-    echo "Creating directory and downloading tokenizer files..."
-    mkdir -p "$TOKENIZER_MODEL"
-    wget -O "$TOKENIZER_MODEL/special_tokens_map.json" https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/special_tokens_map.json
-    wget -O "$TOKENIZER_MODEL/tokenizer.json" https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.json
-    wget -O "$TOKENIZER_MODEL/tokenizer.model" https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer.model
-    wget -O "$TOKENIZER_MODEL/tokenizer_config.json" https://huggingface.co/NousResearch/Llama-2-7b-chat-hf/resolve/main/tokenizer_config.json
-    echo "Tokenizer files downloaded successfully to $TOKENIZER_MODEL."
-else
-    echo "Folder $TOKENIZER_MODEL already exists. Skipping download."
-fi
-
-if [ "$TOKENIZER_TYPE" == "Llama2Tokenizer" ]; then
-    echo "Using Llama2Tokenizer."
-    TOKENIZER_MODEL="$TOKENIZER_MODEL/tokenizer.model"  
-    echo "$TOKENIZER_MODEL"
-else
-    echo "Using HuggingFaceTokenizer."
-fi
-
-MAX_POSITION_EMBEDDINGS=32000
-
 DEFAULT_LOG_DIR="${EXPERIMENT_DIR}/${NNODES}nodes_rank${NODE_RANK}_train_${MODEL_SIZE}B_mbs${MBS}_bs${BS}_tp${TP}_pp${PP}_cp${CP}_iter${TOTAL_ITERS}/TE_FP8_${TE_FP8}/${TIME_STAMP}"
 LOG_DIR="${LOG_DIR:-${DEFAULT_LOG_DIR}}"
 TRAIN_LOG="${LOG_DIR}/output_${EXP_NAME}.log"
 mkdir -p $LOG_DIR
 echo $TRAIN_LOG
 
-# gemm tuning 
+# gemm tuning
 if [ "$GEMM_TUNING" -eq 1 ]; then
-   export TE_HIPBLASLT_TUNING_RUN_COUNT=10
-   export TE_HIPBLASLT_TUNING_ALGO_COUNT=50
+    export TE_HIPBLASLT_TUNING_RUN_COUNT=10
+    export TE_HIPBLASLT_TUNING_ALGO_COUNT=50
 fi
 
 if [ "$SEQ_LENGTH" -le 8192 ]; then
-  ds_works=8
+    ds_works=8
 else
-  ds_works=24
+    ds_works=24
 fi
 
 if [[ $MODEL_SIZE -eq 7 ]]; then #llama2-7B
-        HIDDEN_SIZE=4096 # e.g. llama-13b: 5120
-        FFN_HIDDEN_SIZE=11008 # e.g. llama-13b: 13824
-        NUM_LAYERS=32 # e.g. llama-13b: 40
-        NUM_HEADS=32 # e.g. llama-13b: 40
-        NUM_KV_HEADS=32 # No GQA for llama2 7b.
-        SEQ_LENGTH=$SEQ_LENGTH
+    HIDDEN_SIZE=4096 # e.g. llama-13b: 5120
+    FFN_HIDDEN_SIZE=11008 # e.g. llama-13b: 13824
+    NUM_LAYERS=32 # e.g. llama-13b: 40
+    NUM_HEADS=32 # e.g. llama-13b: 40
+    NUM_KV_HEADS=32 # No GQA for llama2 7b.
 elif [[ $MODEL_SIZE -eq 70 ]]; then
-        HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
-        FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
-        NUM_LAYERS=80 # e.g. llama-13b: 40
-        NUM_HEADS=64 # e.g. llama-13b: 40
-        NUM_KV_HEADS=8 # llama3 70B uses GQA
-        SEQ_LENGTH=$SEQ_LENGTH
-        MAX_POSITION_EMBEDDINGS=$MAX_POSITION_EMBEDDINGS
+    HIDDEN_SIZE=8192 # e.g. llama-13b: 5120
+    FFN_HIDDEN_SIZE=28672 # e.g. llama-13b: 13824
+    NUM_LAYERS=80 # e.g. llama-13b: 40
+    NUM_HEADS=64 # e.g. llama-13b: 40
+    NUM_KV_HEADS=8 # llama3 70B uses GQA
 else
-        echo "Model size not supported."
-        exit 1
+    echo "Model size not supported."
+    exit 1
 fi
 
 GROUP_SIZE=$(( ${NUM_HEADS} / ${NUM_KV_HEADS} ))
@@ -192,7 +148,7 @@ if [ "$RECOMPUTE" -eq 1 ]; then
         --recompute-granularity full \
         --recompute-method block \
         "
-fi 
+fi
 
 if [ "$ROPE_FUSION" -eq 0 ]; then
     GPT_ARGS="$GPT_ARGS --no-rope-fusion"
@@ -206,8 +162,7 @@ TRAIN_ARGS="--lr 1e-4 \
         --clip-grad 1.0 \
         --ckpt-format torch_dist \
 "
-#   --use-torch-fsdp2 requires --ckpt-format torch_dist
-
+# Note that --use-torch-fsdp2 requires --ckpt-format torch_dist
 
 if [ "$OPTIMIZER" == "adam" ]; then
     TRAIN_ARGS="$TRAIN_ARGS --optimizer adam \
@@ -232,10 +187,12 @@ DATA_ARGS="
     --num-workers $ds_works \
 "
 
-if [ "$MOCK_DATA" -eq 1 ];then
+if [ -z ${DATA_PATH+x} ]; then
     DATA_ARGS="$DATA_ARGS --mock-data"
+    echo "Using Mock data"
 else
     DATA_ARGS="$DATA_ARGS --data-path $DATA_PATH"
+    echo "Using ${DATA_PATH} data"
 fi
 
 OUTPUT_ARGS="
@@ -243,7 +200,7 @@ OUTPUT_ARGS="
     --save-interval 5000 \
     --log-throughput \
     --no-save-optim \
-    --eval-iters -1   
+    --eval-iters -1
 "
 #  --save $CHECKPOINT_PATH \
 
@@ -270,7 +227,6 @@ EXTRA_ARGS="
     --overlap-grad-reduce \
 "
 
-
 if [ "$FSDP" -eq 1 ]; then
     EXTRA_ARGS="$EXTRA_ARGS --use-torch-fsdp2"
     if [ "$SEQ_PARALLEL" -eq 1 ]; then
@@ -285,23 +241,23 @@ else
 fi
 
 if [ "$ENABLE_PROFILING" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --profile --use-pytorch-profiler --tensorboard-dir $LOG_DIR"
+    EXTRA_ARGS="$EXTRA_ARGS --profile --use-pytorch-profiler --tensorboard-dir $LOG_DIR"
 fi
 
 if [ "$USE_FLASH_ATTN" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --use-flash-attn"
+    EXTRA_ARGS="$EXTRA_ARGS --use-flash-attn"
 fi
 
 if [ "$SEQ_PARALLEL" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
+    EXTRA_ARGS="$EXTRA_ARGS --sequence-parallel"
 fi
 
 if [ "$CONTI_PARAMS" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --use-contiguous-parameters-in-local-ddp"
+    EXTRA_ARGS="$EXTRA_ARGS --use-contiguous-parameters-in-local-ddp"
 fi
 
 if [ "$MCORE" -eq 1 ]; then
-EXTRA_ARGS="$EXTRA_ARGS --use-mcore-models"
+    EXTRA_ARGS="$EXTRA_ARGS --use-mcore-models"
 fi
 
 if [ "$TE_FP8" -eq 1 ]; then
