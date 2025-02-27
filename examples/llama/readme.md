@@ -15,7 +15,7 @@ docker run \
     --device /dev/dri --device /dev/kfd \
     --network host --ipc host \
     --group-add video --cap-add SYS_PTRACE --security-opt seccomp=unconfined --privileged \
-    -v .:/root \
+    -v .:/root/Megatron-LM \
     --shm-size 64G \
     rocm/pytorch-training:latest bash
 ```
@@ -32,7 +32,7 @@ Run
 pip install .
 ```
 
-to install megatron package.
+in `/root/Megatron-LM` to install megatron package.
 
 ---
 
@@ -77,7 +77,7 @@ required network-related environment variables (see Section 3.1) and run
 
 where `address` is the master node ip address.
 
-## 3. Configurations in Script (`Megatron/examples/llama`)
+## 3. Configurations in Scripts
 
 ### 3.1 Network Interface
 Update the network interface in the training scripts to match your system’s network
